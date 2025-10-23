@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import logo from "../assets/logo.png"
+
 type MenuItem = {
   title: string;
   hasDropdown?: boolean;
@@ -100,7 +101,6 @@ export default function Navbar() {
             src={logo}
             alt="Startup Mahakumbh Logo"
             height={70}
-            
           />
         </div>
 
@@ -117,13 +117,13 @@ export default function Navbar() {
               </div>
 
               {item.hasDropdown && (
-                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg p-3 min-w-[200px] opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transform -translate-y-2 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
+                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg p-3 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transform -translate-y-2 transition-all duration-200">
                   <ul className="space-y-2 text-sm text-gray-600">
                     {item.DropdownOptions?.map((option, index) => (
                       <li key={option}>
                         <Link
                           href={item.LinksList?.[index] || "#"}
-                          className="block hover:text-blue-700 transition"
+                          className="block hover:text-blue-700 transition py-1 px-2 rounded"
                         >
                           {option}
                         </Link>
@@ -158,19 +158,20 @@ export default function Navbar() {
                 onClick={() =>
                   item.hasDropdown ? toggleDropdown(item.title) : null
                 }
-                className="flex items-center justify-between w-full text-gray-700 py-2"
+                className="flex items-center justify-between w-full text-gray-700 py-2 hover:text-blue-700 transition-colors"
               >
                 <span>{item.title}</span>
                 {item.hasDropdown && <ChevronDown size={16} />}
               </button>
 
               {item.hasDropdown && activeDropdown === item.title && (
-                <ul className="pl-4 space-y-2 text-sm text-gray-600">
+                <ul className="pl-4 space-y-2 text-sm text-gray-600 border-l-2 border-gray-200 ml-2 mt-1">
                   {item.DropdownOptions?.map((option, index) => (
                     <li key={option}>
                       <Link
                         href={item.LinksList?.[index] || "#"}
-                        className="block hover:text-blue-700 transition"
+                        className="block hover:text-blue-700 transition py-1 px-2 rounded"
+                        onClick={() => setMenuOpen(false)}
                       >
                         {option}
                       </Link>
@@ -181,7 +182,7 @@ export default function Navbar() {
             </div>
           ))}
 
-          <button className="w-full bg-[#000C45] text-white py-2 rounded-md mt-3">
+          <button className="w-full bg-[#000C45] text-white py-2 rounded-md mt-3 hover:bg-blue-900 transition">
             Register Now
           </button>
         </div>
