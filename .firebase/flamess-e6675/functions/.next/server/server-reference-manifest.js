@@ -1,0 +1,1 @@
+self.__RSC_SERVER_MANIFEST="{\"node\":{\"7f10712d77bbd9e7049a90ebaf6f809b8ebbea1e77\":{\"workers\":{\"app/page\":{\"moduleId\":\"10111\",\"async\":false}},\"layer\":{\"app/page\":\"action-browser\"},\"filename\":\"lib/actions.ts\",\"exportedName\":\"subscribeEmail\"}},\"edge\":{},\"encryptionKey\":\"process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY\"}"
