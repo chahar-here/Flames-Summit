@@ -9,6 +9,11 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.firebase
+functions/node_modules
+.next
+.cache
+dist
 
 # testing
 /coverage
