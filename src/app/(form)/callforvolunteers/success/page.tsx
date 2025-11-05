@@ -39,7 +39,7 @@ const SuccessPage = () => {
   if (!isClient) return null;
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-transparent">
       <InteractiveDotBackground />
 
       <div className="fixed inset-0 z-50 bg-transparent flex flex-col items-center justify-center">
