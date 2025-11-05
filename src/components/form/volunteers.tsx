@@ -105,6 +105,7 @@ export function VolunteersForm() {
         });
         setSelectedRole("");
         router.push("callforvolunteers/success");
+              setLoading(false);
       } else {
         // 4. Handle error from the server
         toast.error(result.error || "Failed to submit application.");
@@ -112,9 +113,9 @@ export function VolunteersForm() {
     } catch (error) {
       console.error("Error submitting form: ", error);
       toast.error("An unexpected error occurred. Please try again.");
+            setLoading(false);
     } finally {
       setIsSubmitting(false);
-      setLoading(false);
     }
   };
   // --- END OF MODIFIED HANDLER ---
