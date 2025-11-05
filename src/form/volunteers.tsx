@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
-
+import Loder from "../components/Loder";
+import { useRouter } from 'next/navigation';
 export function VolunteersForm() {
+    const router = useRouter();
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -19,7 +21,7 @@ export function VolunteersForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
-
+  const [loading,setLoading]=useState(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -49,7 +51,7 @@ export function VolunteersForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+    setLoading(true);
     if (isSubmitting) return;
     
     try {
@@ -78,14 +80,20 @@ export function VolunteersForm() {
         whyJoin: ""
       });
       setSelectedRole("");
-      
+      router.push('/success');
     } catch (error) {
       console.error("Error adding document: ", error);
       toast.error("Failed to submit application. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setLoading(false);
     }
   };
+  
+  if(loading){
+    return <Loder/>
+  }
+
   return (
     
     <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
