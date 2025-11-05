@@ -13,7 +13,7 @@ export default function Loader() {
   if (!isClient) return null; // Don’t render during SSR
 
   return (
-    <div className="flex justify-center items-center h-screen bg-white">
+    <div className="flex justify-center items-center h-screen ">
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, duration: 2, ease: "linear" }}

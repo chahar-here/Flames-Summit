@@ -220,10 +220,6 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
           )}
         </div>
       ))}
-      {/* Theme Toggle added here */}
-      <div className="ml-4">
-        <ThemeToggle />
-      </div>
     </motion.div>
   );
 };
@@ -293,13 +289,6 @@ export const MobileNavMenu = ({
           )}
         >
           {children}
-          {/* Theme Toggle for mobile menu */}
-          <div className="w-full pt-4 border-t border-white/[0.2]">
-            <div className="flex items-center justify-between">
-              <span className="text-neutral-300 text-sm">Theme</span>
-              <ThemeToggle />
-            </div>
-          </div>
         </motion.div>
       )}
     </AnimatePresence>

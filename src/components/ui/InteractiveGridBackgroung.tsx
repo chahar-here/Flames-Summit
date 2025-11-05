@@ -13,7 +13,7 @@
 //         )}
 //       />
 //       {/* Radial gradient for the container to give a faded look */}
-//       <div className="pointer-events-none fixed inset-0 -z-50 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
+//       <div className="pointer-events-none fixed inset-0 -z-50 flex items-center justify-center  [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
       
 //     </div>
 //   );
@@ -80,7 +80,7 @@ export function GridSmallBackgroundDemo() {
       <div
         className={cn(
           "pointer-events-none fixed inset-0 -z-30", // On top of both grids
-          "flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black",
+          "flex items-center justify-center  [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black",
         )}
       />
     </>
