@@ -19,7 +19,8 @@ export function VolunteersForm() {
     linkedin: "",
     role: "",
     customRole: "",
-    whyJoin: ""
+    whyJoin: "",
+    approved:false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
@@ -79,7 +80,8 @@ export function VolunteersForm() {
         linkedin: "",
         role: "",
         customRole: "",
-        whyJoin: ""
+        whyJoin: "",
+        approved: false,
       });
       setSelectedRole("");
       router.push('/success');
