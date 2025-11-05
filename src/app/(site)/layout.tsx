@@ -79,7 +79,6 @@ export default function RootLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
     <html lang="en">
-      <head />
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
