@@ -1,17 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import { Label } from "../components/ui/label";
-import { Input } from "../components/ui/input";
-import { Select } from "../components/ui/select";
-import { Textarea } from "../components/ui/textarea";
+import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
+import { Select } from "../../components/ui/select";
+import { Textarea } from "../../components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
-import Loder from "../components/Loder";
-import { useRouter } from 'next/navigation';
+import Loder from "../../components/Loder";
+import { useRouter } from "next/navigation";
 export function VolunteersForm() {
-    const router = useRouter();
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -21,9 +20,10 @@ export function VolunteersForm() {
     customRole: "",
     whyJoin: ""
   });
+  const router=useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
-  const [loading,setLoading]=useState(false);
+  const [loading,setLoading]=useState(false)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -53,7 +53,7 @@ export function VolunteersForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setLoading(true)
     if (isSubmitting) return;
     
     try {
@@ -82,7 +82,7 @@ export function VolunteersForm() {
         whyJoin: ""
       });
       setSelectedRole("");
-      router.push('/success');
+      router.push("callforvolunteers/success")
     } catch (error) {
       console.error("Error adding document: ", error);
       toast.error("Failed to submit application. Please try again.");
@@ -91,14 +91,12 @@ export function VolunteersForm() {
       setLoading(false);
     }
   };
-  
   if(loading){
     return <Loder/>
   }
-
   return (
     
-    <div className="shadow-input mx-auto w-full max-w-md rounded-none  p-4 md:rounded-2xl md:p-8 dark:bg-black">
+    <div className="shadow-input mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black">
       <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300 text-center">Fill this form to apply for volunteering
       </p>
 
@@ -111,7 +109,7 @@ export function VolunteersForm() {
               name="fullname"
               value={formData.fullname}
               onChange={handleChange}
-              placeholder="Raj Chahar" 
+              placeholder="Stanley Ipkiss" 
               type="text" 
               required 
             />

@@ -1,5 +1,5 @@
 import { InteractiveDotBackground } from '@/components/ui/InteractiveDotBackground'
-import { VolunteersForm } from '../../../form/volunteers'
+import { VolunteersForm } from '@/components/form/volunteers'
 import React from 'react'
 import { TextGenerateEffect } from "../../../components/ui/text-generate-effect";
 
