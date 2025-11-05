@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import logo from "../assets/logo.png"
+import { ThemeToggle } from "./theme-toggle";
 
 type MenuItem = {
   title: string;
@@ -93,7 +94,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full border-b bg-white shadow-sm sticky top-0 z-50">
+    <nav className="w-full border-b bg-white shadow-sm sticky top-0 z-50 dark:bg-gray-900 dark:border-gray-700">
       <div className="flex justify-between items-center px-6 md:px-12 py-2">
         {/* Logo + Tagline */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
@@ -111,19 +112,19 @@ export default function Navbar() {
               key={item.title}
               className="relative group"
             >
-              <div className="flex items-center space-x-1 text-gray-700 hover:text-blue-700 transition-colors cursor-pointer">
+              <div className="flex items-center space-x-1 text-gray-700 hover:text-blue-700 transition-colors cursor-pointer dark:text-gray-300 dark:hover:text-blue-400">
                 <span>{item.title}</span>
                 {item.hasDropdown && <ChevronDown size={16} />}
               </div>
 
               {item.hasDropdown && (
-                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg p-3 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transform -translate-y-2 transition-all duration-200">
+                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg p-3 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transform -translate-y-2 transition-all duration-200 dark:bg-gray-800 dark:border-gray-600">
                   <ul className="space-y-2 text-sm text-gray-600">
                     {item.DropdownOptions?.map((option, index) => (
                       <li key={option}>
                         <Link
                           href={item.LinksList?.[index] || "#"}
-                          className="block hover:text-blue-700 transition py-1 px-2 rounded"
+                          className="block hover:text-blue-700 transition py-1 px-2 rounded dark:hover:text-blue-400 dark:text-gray-300"
                         >
                           {option}
                         </Link>
@@ -135,6 +136,7 @@ export default function Navbar() {
             </div>
           ))}
 
+          <ThemeToggle />
           <button className="bg-[#000C45] text-white px-6 py-2 rounded-md hover:bg-blue-900 transition">
             Register Now
           </button>
@@ -142,9 +144,9 @@ export default function Navbar() {
 
         {/* Mobile Menu Toggle */}
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden text-gray-700"
-        >
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="lg:hidden text-gray-700 dark:text-gray-300"
+          >
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -158,7 +160,7 @@ export default function Navbar() {
                 onClick={() =>
                   item.hasDropdown ? toggleDropdown(item.title) : null
                 }
-                className="flex items-center justify-between w-full text-gray-700 py-2 hover:text-blue-700 transition-colors"
+                className="flex items-center justify-between w-full text-gray-700 py-2 hover:text-blue-700 transition-colors dark:text-gray-300 dark:hover:text-blue-400"
               >
                 <span>{item.title}</span>
                 {item.hasDropdown && <ChevronDown size={16} />}
@@ -169,10 +171,10 @@ export default function Navbar() {
                   {item.DropdownOptions?.map((option, index) => (
                     <li key={option}>
                       <Link
-                        href={item.LinksList?.[index] || "#"}
-                        className="block hover:text-blue-700 transition py-1 px-2 rounded"
-                        onClick={() => setMenuOpen(false)}
-                      >
+                          href={item.LinksList?.[index] || "#"}
+                          className="block hover:text-blue-700 transition py-1 px-2 rounded dark:hover:text-blue-400 dark:text-gray-300"
+                          onClick={() => setMenuOpen(false)}
+                        >
                         {option}
                       </Link>
                     </li>
@@ -182,9 +184,12 @@ export default function Navbar() {
             </div>
           ))}
 
-          <button className="w-full bg-[#000C45] text-white py-2 rounded-md mt-3 hover:bg-blue-900 transition">
-            Register Now
-          </button>
+          <div className="flex items-center justify-between">
+            <ThemeToggle />
+            <button className="bg-[#000C45] text-white py-2 rounded-md hover:bg-blue-900 transition px-6">
+              Register Now
+            </button>
+          </div>
         </div>
       )}
     </nav>
