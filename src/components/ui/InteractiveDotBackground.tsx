@@ -22,19 +22,16 @@ export function InteractiveDotBackground() {
   return (
     <div
       className={cn(
-        // Base layer (Gray dots)
-        "fixed inset-0 -z-50",
+        // Base layer (Darker dots - less visible)
+        "fixed inset-0 -z-50 bg-transparent",
         "[background-size:20px_20px]",
-        "[background-image:radial-gradient(#404040_1px,transparent_1px)]",
-
-        // ADDED: This mask applies to the entire container, fading both layers
-        "[mask-image:radial-gradient(ellipse_at_center,white_50%,transparent_100%)]",
+        "[background-image:radial-gradient(rgba(64,64,64,0.5)_1px,transparent_1px)]",
 
         // Top layer (White dots)
         // We use a ::after pseudo-element for this
-        "after:content-[''] after:fixed after:inset-0 after:-z-40",
+        "after:content-[''] after:fixed after:inset-0 after:-z-40 after:bg-transparent",
         "after:[background-size:20px_20px]",
-        "after:[background-image:radial-gradient(white_1px,transparent_1px)]",
+        "after:[background-image:radial-gradient(rgba(255,255,255,0.8)_1px,transparent_1px)]",
 
         // The Mask for the top layer (follows mouse)
         // This reveals the white dots only around the mouse
