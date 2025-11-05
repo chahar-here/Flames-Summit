@@ -13,6 +13,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-24 mb-10">
           {/* Logo & Social Media links*/}
           <div className=" w-full flex-col items-center justify-center md:justify-start">
+            <Link href="/" className="inline-block">
             <Image
               src="/flames_white.png"
               alt="Tedxsviet"
@@ -20,6 +21,7 @@ export function Footer() {
               height={300}
               className="object-contain"
             />
+            </Link>
             {/* Social Media links */}
             <div className="flex items-center justify-center mt-6 space-x-10">
               <a href="https://x.com/flamessummit" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
