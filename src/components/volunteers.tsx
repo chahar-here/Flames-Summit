@@ -192,26 +192,11 @@ export default function VolunteerDashboard() {
   });
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 bg-black">
       {/* Header and Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-[#E62B1E]">Volunteer Applications</h1>
         <div className="flex gap-2">
-          <div className="flex justify-end">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`px-4 py-2 rounded-l-md ${viewMode === "grid" ? "bg-red-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              Grid View
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`px-4 py-2 rounded-r-md ${viewMode === "list" ? "bg-red-600 text-white" : "bg-gray-200 text-black"}`}
-            >
-              List View
-            </button>
-          </div>
-
           <input
             type="text"
             placeholder="Search by name or role..."
@@ -234,82 +219,8 @@ export default function VolunteerDashboard() {
           </button>
         </div>
       </div>
-
-      {/* Volunteer Grid */}
-      {loading && volunteers.length === 0 ? (
-        <div className="h-screen flex items-center justify-center">
-          <LoaderOne />
-        </div>
-      ) : viewMode === "grid" ? (
-        // 🟦 GRID VIEW
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredVolunteers.map((volunteer) => (
-            <div
-              key={volunteer.id}
-              className="bg-black rounded-2xl flex flex-col shadow-md border hover:shadow-lg transition-all duration-300 overflow-hidden"
-            >
-              <div className="relative h-48 w-full">
-                <Image
-                  src="/flames_white.png"
-                  alt="flames-logo"
-                  layout="fill"
-                  className="object-cover"
-                />
-                <div
-                  className={`absolute top-2 right-2 px-2 py-1 text-xs font-bold text-white rounded-full ${volunteer.approved ? "bg-green-600" : "bg-yellow-600"
-                    }`}
-                >
-                  {volunteer.approved ? "Approved" : "Pending"}
-                </div>
-              </div>
-              <div className="p-4 flex flex-col flex-grow">
-                <h2 className="text-lg font-semibold text-white">{volunteer.fullname}</h2>
-                <p className="text-sm font-medium text-[#E62B1E] mb-2">{volunteer.role}</p>
-                <p className="text-xs text-white italic mb-4 flex-grow">
-                  "{volunteer.whyJoin}"
-                </p>
-                <div className="flex items-center justify-center gap-4 text-gray-500 mb-4 border-t pt-4">
-                  {volunteer.linkedin && (
-                    <a
-                      href={volunteer.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <IconBrandLinkedin className="hover:text-blue-700" />
-                    </a>
-                  )}
-                </div>
-                <div className="flex justify-end gap-2 mt-auto">
-                  <button
-                    onClick={() => handleApproveToggle(volunteer)}
-                    className={`px-3 py-1 rounded-md text-sm text-white ${volunteer.approved
-                        ? "bg-orange-500 hover:bg-orange-600"
-                        : "bg-green-600 hover:bg-green-700"
-                      }`}
-                  >
-                    {volunteer.approved ? "Unapprove" : "Approve"}
-                  </button>
-                  <button
-                    onClick={() => setEditVolunteer(volunteer)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(volunteer)}
-                    className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        // 🟩 LIST VIEW
 <div className="w-full overflow-x-auto">
-  <div className="min-w-[800px] grid grid-cols-6 gap-4 bg-[#111] text-white font-semibold text-sm rounded-t-xl p-3 border-b border-gray-700">
+  <div className="min-w-[800px] grid grid-cols-6 gap-4 bg-[#111] text-white font-semibold text-sm rounded-t-xl p-3 px-5 border-b border-gray-700">
     <div>Full Name</div>
     <div>Role</div>
     <div>Email</div>
@@ -330,8 +241,6 @@ export default function VolunteerDashboard() {
   setEditVolunteer={setEditVolunteer}
 />
 </div>
-
-      )}
 
 
       {/* Load More Button */}

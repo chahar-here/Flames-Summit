@@ -18,8 +18,7 @@ const Page = () => {
   }, []);
 
   return (
-    <div>
-        <InteractiveDotBackground/>
+    <div className="bg-black h-screen">
       <VolunteerDashboard />
     </div>
   );
