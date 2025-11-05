@@ -41,8 +41,8 @@ export function Footer() {
                 <Link href="/partenerwithus" className="hover:text-white transition">
                  Partner with us
                 </Link>
-                <Link href="/workwithus" className="hover:text-white transition">
-                  Work with us
+                <Link href="/callforvolunteers" className="hover:text-white transition">
+                  Become a Volunteer
                 </Link>
                 <Link href="/faqs" className="hover:text-white transition">
                   FAQs

@@ -23,9 +23,10 @@ export function InteractiveDotBackground() {
     <div
       className={cn(
         // Base layer (Darker dots - less visible)
-        "fixed inset-0 -z-50 bg-transparent",
+        "fixed inset-0 bg-black",
         "[background-size:20px_20px]",
-        "[background-image:radial-gradient(rgba(64,64,64,0.5)_1px,transparent_1px)]",
+        "[background-image:radial-gradient(#404040_1px,transparent_1px)]",
+        "-z-40",
 
         // Top layer (White dots)
         // We use a ::after pseudo-element for this

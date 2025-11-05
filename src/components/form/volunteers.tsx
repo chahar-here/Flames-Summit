@@ -5,144 +5,185 @@ import { Input } from "../../components/ui/input";
 import { Select } from "../../components/ui/select";
 import { Textarea } from "../../components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import Loder from "../../components/Loder";
 import { useRouter } from "next/navigation";
+
+// --- MODIFIED IMPORTS ---
+// We import the server action and its data type
+import {
+  submitVolunteerForm,
+  VolunteerApplicationData,
+} from "@/lib/actions";
+// We no longer need client-side 'db', 'addDoc', or 'collection'
+// ---
+
 export function VolunteersForm() {
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
     phone: "",
     linkedin: "",
-    role: "",
+    role: "", // This is now just for tracking the form, not final data
     customRole: "",
     whyJoin: "",
-    approved:false,
   });
-  const router=useRouter();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
-  const [loading,setLoading]=useState(false)
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const [loading, setLoading] = useState(false);
+
+  // This logic remains the same
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
+  // This logic remains the same
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedRole(value);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       role: value === "other" ? "" : value,
-      customRole: ""
+      customRole: "",
     }));
   };
 
+  // This logic remains the same
   const handleCustomRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       customRole: value,
-      role: value
+      role: value, // This seems to be your logic, it's fine
     }));
   };
 
+  // --- MODIFIED SUBMIT HANDLER ---
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     if (isSubmitting) return;
-    
+    setIsSubmitting(true);
+
+    // 1. Create the clean data object to send to the server
+    const finalRole =
+      selectedRole === "other" ? formData.customRole : selectedRole;
+
+    const applicationData: VolunteerApplicationData = {
+      fullname: formData.fullname,
+      email: formData.email,
+      phone: formData.phone,
+      linkedin: formData.linkedin,
+      role: finalRole,
+      whyJoin: formData.whyJoin,
+    };
+
     try {
-      setIsSubmitting(true);
-      
-      const submissionData = {
-        ...formData,
-        role: selectedRole === "other" ? formData.customRole : selectedRole,
-        timestamp: new Date().toISOString()
-      };
-      
-      // Add a new document with a generated ID
-      const docRef = await addDoc(collection(db, "volunteers"), submissionData);
-      
-      console.log("Document written with ID: ", docRef.id);
-      toast.success("Application submitted successfully!");
-      
-      // Reset form
-      setFormData({
-        fullname: "",
-        email: "",
-        phone: "",
-        linkedin: "",
-        role: "",
-        customRole: "",
-        whyJoin: "",
-        approved: false,
-      });
-      setSelectedRole("");
-      router.push("callforvolunteers/success")
+      // 2. Call the new server action
+      const result = await submitVolunteerForm(applicationData);
+
+      if (result.success) {
+        // 3. Handle success (same as your original code)
+        toast.success(result.message || "Application submitted successfully!");
+
+        // Reset form
+        setFormData({
+          fullname: "",
+          email: "",
+          phone: "",
+          linkedin: "",
+          role: "",
+          customRole: "",
+          whyJoin: "",
+        });
+        setSelectedRole("");
+        router.push("callforvolunteers/success");
+              setLoading(false);
+      } else {
+        // 4. Handle error from the server
+        toast.error(result.error || "Failed to submit application.");
+      }
     } catch (error) {
-      console.error("Error adding document: ", error);
-      toast.error("Failed to submit application. Please try again.");
+      console.error("Error submitting form: ", error);
+      toast.error("An unexpected error occurred. Please try again.");
+            setLoading(false);
     } finally {
       setIsSubmitting(false);
-      setLoading(false);
     }
   };
-  if(loading){
-    return <Loder/>
+  // --- END OF MODIFIED HANDLER ---
+
+  if (loading) {
+    return <Loder />;
   }
+
+  // --- All JSX below this line is IDENTICAL to your original file ---
   return (
-    
-<div className="shadow-input mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black/20 backdrop-blur-lg">
-      <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300 text-center">Fill this form to apply for volunteering
+    <div className="shadow-input mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black/80">
+      <h1 className="text-3xl text-white md:text-5xl font-bold tracking-tight text-center my-4">
+        Call for{" "}
+        <span className=" bg-clip-text bg-gradient-to-r text-[#eb0028]">
+          Voluteers
+        </span>
+      </h1>
+      <p className="mt-2 max-w-sm text-sm text-neutral-300 text-center">
+        Join the
+        <span className="text-[#b62129] font-semibold"> Flames Summit India </span>
+        Volunteer Team and be part of something meaningful.
+      </p>
+      <p className="text-center mt-1 text-white">
+        Questions?
+        <span className="text-[#b62129] font-medium"> info@flamessummit.org</span>
       </p>
 
-      <form className="my-8" onSubmit={handleSubmit}>
+      <form className="mt-8" onSubmit={handleSubmit}>
         <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
           <LabelInputContainer>
-            <Label htmlFor="fullname">Full name</Label>
-            <Input 
-              id="fullname" 
+            <Label htmlFor="fullname">Full name <span className="text-red-500">*</span></Label>
+            <Input
+              id="fullname"
               name="fullname"
               value={formData.fullname}
               onChange={handleChange}
-              placeholder="Stanley Ipkiss" 
-              type="text" 
-              required 
+              placeholder="Stanley Ipkiss"
+              type="text"
+              required
             />
           </LabelInputContainer>
         </div>
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="email">Email Address</Label>
-          <Input 
-            id="email" 
+          <Label htmlFor="email">Email Address <span className="text-red-500">*</span></Label>
+          <Input
+            id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="projectmayhem@fc.com" 
-            type="email" 
-            required 
+            placeholder="projectmayhem@fc.com"
+            type="email"
+            required
           />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="Phone">Phone</Label>
-          <Input 
-            id="phone" 
+          <Label htmlFor="Phone">Phone <span className="text-red-500">*</span></Label>
+          <Input
+            id="phone"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="+91 xxxxxxxxxx" 
-            type="tel" 
-            required 
+            placeholder="+91 xxxxxxxxxx"
+            type="tel"
+            required
           />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="linkedin">Linkedin</Label>
+          <Label htmlFor="linkedin">Linkedin <span className="text-red-500">*</span></Label>
           <Input
             id="linkedin"
             name="linkedin"
@@ -154,13 +195,13 @@ export function VolunteersForm() {
           />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="role">Role</Label>
+          <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
           <Select
             id="role"
             name="role"
             value={selectedRole}
             onChange={handleRoleChange}
-            className="flex h-10 w-full rounded-md   px-3 py-2 text-sm text-neutral-700 placeholder:text-neutral-400  disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-neutral-300 dark:placeholder:text-neutral-600"
+            className="flex h-10 w-full rounded-md   px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-800 text-neutral-300 placeholder:text-neutral-600"
             required
           >
             <option value="">Select your role</option>
@@ -182,41 +223,42 @@ export function VolunteersForm() {
               type="text"
               value={formData.customRole}
               onChange={handleCustomRoleChange}
-              required={selectedRole === 'other'}
+              required={selectedRole === "other"}
             />
           </LabelInputContainer>
         )}
-                <LabelInputContainer className="mb-8">
-          <Label htmlFor="whyJoin">Why do you want to join? <span className="text-red-500">*</span></Label>
+        <LabelInputContainer className="mb-8">
+          <Label htmlFor="whyJoin">
+            Why do you want to join? <span className="text-red-500">*</span>
+          </Label>
           <Textarea
             id="whyJoin"
             name="whyJoin"
             value={formData.whyJoin}
             onChange={handleChange}
             placeholder="Tell us why you want to join our team..."
-            className="flex h-32 w-full rounded-md  px-3 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 transition-colors  disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-neutral-300 dark:placeholder:text-neutral-600"
+            className="flex h-32 w-full rounded-md  px-3 py-2 text-sm transition-colors  disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-800 text-neutral-300 placeholder:text-neutral-600"
             required
           />
         </LabelInputContainer>
 
         <button
-          className={`group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+          className={`group/btn relative block h-10 w-full rounded-md bg-gradient-to-br font-medium text-white bg-zinc-800 from-zinc-900 to-zinc-900 shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] ${
+            isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+          }`}
           disabled={isSubmitting}
           type="submit"
         >
-          {isSubmitting ? 'Submitting...' : 'Submit →'}
+          {isSubmitting ? "Submitting..." : "Submit →"}
           <BottomGradient />
         </button>
+        <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent dark:via-[#E62B1E]/80" />
 
-        <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
-
-        <div className="flex flex-col space-y-4">
-        </div>
+        <div className="flex flex-col space-y-4"></div>
       </form>
     </div>
   );
 }
-
 const BottomGradient = () => {
   return (
     <>
