@@ -5,7 +5,7 @@ import { adminDb } from './firebaseAdmin'; // Use the server-side admin DB
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-
+// Subscribe email action
 export const subscribeEmail = async (email: string) => {
   if (!email) {
     return { success: false, error: 'Email is required.' };
@@ -83,5 +83,72 @@ export const subscribeEmail = async (email: string) => {
   } catch (error) {
     console.error('Action Error:', error);
     return { success: false, error: 'Something went wrong. Please try again.' };
+  }
+};
+// 
+export interface VolunteerApplicationData {
+  fullname: string;
+  email: string;
+  phone: string;
+  linkedin: string;
+  role: string; // This will be the final role (e.g., "Web Developer" or the custom text)
+  whyJoin: string;
+}
+// --- THIS IS THE NEW SERVER ACTION FOR Volunteer application ---
+export const submitVolunteerForm = async (formData: VolunteerApplicationData) => {
+  const { fullname, email, role, whyJoin } = formData;
+
+  // 1. Basic server-side validation
+  if (!fullname || !email || !role || !whyJoin) {
+    return { success: false, error: 'Missing required fields.' };
+  }
+
+  try {
+    // 2. Save to Firestore using the secure Admin SDK
+    const submissionData = {
+      ...formData,
+      timestamp: new Date().toISOString(),
+    };
+    await adminDb.collection('volunteers').add(submissionData);
+
+    // 3. Send the confirmation email
+    const firstName = fullname.split(' ')[0] || 'there'; // Get first name
+
+    await resend.emails.send({
+      from: 'Flames Summit <hello@flamessummit.org>',
+      to: email,
+      subject: "We've Received Your Volunteer Application! 🔥",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+          <img 
+            src="https://www.flamessummit.org/email-banner.png" 
+            alt="Flames Summit Banner" 
+            style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;" 
+          />
+          <h1 style="color: #333;">Hey ${firstName},</h1>
+          <p style="color: #555;">Thank you for applying to be a volunteer at Flames Summit India!</p>
+          <p style="color: #555;">We've successfully received your application for the <strong>${role}</strong> role.</p>
+          <p style="color: #555;">Our team will review your application and get back to you soon with the next steps.</p>
+          <br/>
+          <p style="color: #555;">The Flames Summit Team</p>
+          <hr style="border: none; border-top: 1px solid #eaeaea; margin: 20px 0;" />
+          <div style="text-align: center; font-size: 12px; color: #777;">
+            <p style="margin: 0 0 10px 0;">Follow us for updates:</p>
+            <a href="https://www.instagram.com/flamessummitindia/" style="margin: 0 10px; text-decoration: none; color: #E1306C; font-weight: bold;">Instagram</a>
+            <a href="https://www.linkedin.com/company/flamessummitindia/" style="margin: 0 10px; text-decoration: none; color: #0077b5; font-weight: bold;">LinkedIn</a>
+            <a href="https://x.com/flamessummit" style="margin: 0 10px; text-decoration: none; color: #1DA1F2; font-weight: bold;">X (Twitter)</a>
+          </div>
+        </div>
+      `,
+    });
+
+    // 4. Return success
+    return { success: true, message: 'Application submitted successfully!' };
+  } catch (error) {
+    console.error('Action Error (submitVolunteerForm):', error);
+    return {
+      success: false,
+      error: 'Something went wrong. Please try again.',
+    };
   }
 };

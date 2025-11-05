@@ -43,12 +43,10 @@ export function GridSmallBackgroundDemo() {
       {/* Layer 1: Base Grid (Dark) */}
       <div
         className={cn(
-          "fixed inset-0 -z-50", // Base layer, at the very back
+          "fixed inset-0 -z-50 bg-black", // Base layer, at the very back
           "[background-size:20px_20px]",
-          // Light mode grid
-          "[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]",
           // Dark mode grid
-          "dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]",
+          "[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]",
         )}
       />
 
@@ -58,10 +56,8 @@ export function GridSmallBackgroundDemo() {
           "fixed inset-0 -z-40", // On top of the base grid
           "[background-size:20px_20px]",
           // Brighter lines for the highlight effect
-          // Light mode: zinc-400
-          "[background-image:linear-gradient(to_right,#a1a1aa_1px,transparent_1px),linear-gradient(to_bottom,#a1a1aa_1px,transparent_1px)]",
           // Dark mode: neutral-500
-          "dark:[background-image:linear-gradient(to_right,#737373_1px,transparent_1px),linear-gradient(to_bottom,#737373_1px,transparent_1px)]",
+          "[background-image:linear-gradient(to_right,#737373_1px,transparent_1px),linear-gradient(to_bottom,#737373_1px,transparent_1px)]",
           
           // The mouse-following mask
           "[mask-image:radial-gradient(circle_200px_at_var(--mouse-x)_var(--mouse-y),white,transparent)]",
@@ -80,7 +76,7 @@ export function GridSmallBackgroundDemo() {
       <div
         className={cn(
           "pointer-events-none fixed inset-0 -z-30", // On top of both grids
-          "flex items-center justify-center  [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black",
+          "flex items-center justify-center  [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] bg-black",
         )}
       />
     </>
