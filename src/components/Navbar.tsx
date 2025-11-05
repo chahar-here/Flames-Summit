@@ -94,7 +94,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full border-b bg-white shadow-sm sticky top-0 z-50 dark:bg-gray-900 dark:border-gray-700">
+    <nav className="w-full border-b  shadow-sm sticky top-0 z-50 dark:bg-gray-900 dark:border-gray-700">
       <div className="flex justify-between items-center px-6 md:px-12 py-2">
         {/* Logo + Tagline */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
@@ -118,7 +118,7 @@ export default function Navbar() {
               </div>
 
               {item.hasDropdown && (
-                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg p-3 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transform -translate-y-2 transition-all duration-200 dark:bg-gray-800 dark:border-gray-600">
+                <div className="absolute left-0 mt-2  border rounded-lg shadow-lg p-3 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transform -translate-y-2 transition-all duration-200 dark:bg-gray-800 dark:border-gray-600">
                   <ul className="space-y-2 text-sm text-gray-600">
                     {item.DropdownOptions?.map((option, index) => (
                       <li key={option}>

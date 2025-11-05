@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
+import { Select } from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -96,7 +98,7 @@ export function VolunteersForm() {
 
   return (
     
-    <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
+    <div className="shadow-input mx-auto w-full max-w-md rounded-none  p-4 md:rounded-2xl md:p-8 dark:bg-black">
       <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300 text-center">Fill this form to apply for volunteering
       </p>
 
@@ -153,12 +155,12 @@ export function VolunteersForm() {
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="role">Role</Label>
-          <select
+          <Select
             id="role"
             name="role"
             value={selectedRole}
             onChange={handleRoleChange}
-            className="flex h-10 w-full rounded-md  bg-white px-3 py-2 text-sm text-neutral-700 placeholder:text-neutral-400  disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-neutral-300 dark:placeholder:text-neutral-600"
+            className="flex h-10 w-full rounded-md   px-3 py-2 text-sm text-neutral-700 placeholder:text-neutral-400  disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-neutral-300 dark:placeholder:text-neutral-600"
             required
           >
             <option value="">Select your role</option>
@@ -169,7 +171,7 @@ export function VolunteersForm() {
             <option value="content-writer">Content Writer</option>
             <option value="curator">Curator</option>
             <option value="other">Other</option>
-          </select>
+          </Select>
         </LabelInputContainer>
         {selectedRole === "other" && (
           <LabelInputContainer className="mb-8">
@@ -186,13 +188,13 @@ export function VolunteersForm() {
         )}
                 <LabelInputContainer className="mb-8">
           <Label htmlFor="whyJoin">Why do you want to join? <span className="text-red-500">*</span></Label>
-          <textarea
+          <Textarea
             id="whyJoin"
             name="whyJoin"
             value={formData.whyJoin}
             onChange={handleChange}
             placeholder="Tell us why you want to join our team..."
-            className="flex h-32 w-full rounded-md bg-white px-3 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 transition-colors  disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-neutral-300 dark:placeholder:text-neutral-600"
+            className="flex h-32 w-full rounded-md  px-3 py-2 text-sm text-neutral-700 placeholder:text-neutral-400 transition-colors  disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-neutral-300 dark:placeholder:text-neutral-600"
             required
           />
         </LabelInputContainer>
@@ -218,8 +220,11 @@ export function VolunteersForm() {
 const BottomGradient = () => {
   return (
     <>
-      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
-      <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
+      {/* Sharp underline */}
+      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+      {/* Blurred glowing underline */}
+      <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
+
     </>
   );
 };
