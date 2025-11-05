@@ -1,7 +1,9 @@
 "use client";
-import { Geist, Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
+
 import "../globals.css";
 import { useState } from "react";
+import React from "react";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import {
   MobileNav,
   MobileNavHeader,
@@ -12,10 +14,9 @@ import {
   NavbarLogo,
   NavBody,
   NavItems,
-  NavItem, // MODIFIED: Import the NavItem type
+  NavItem,
 } from "@/components/navbar/Nav";
 import { Footer } from "@/components/footer/footer";
-import React from "react"; // MODIFIED: Import React for React.Fragment
 
 const inter = Inter({
   variable: "--font-sans",
@@ -29,18 +30,16 @@ const jetbrainsMono = JetBrains_Mono({
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  // MODIFIED: Updated navItems to use the new structure with children
+}) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const navItems: NavItem[] = [
-    {
-      name: "About",
-      link: "/about",
-    },
+    { name: "About", link: "/about" },
     {
       name: "Conference",
-      link: "/conference", // This is the parent link
+      link: "/conference",
       children: [
         { name: "Speakers", link: "/speakers" },
         { name: "Schedule", link: "/schedule" },
@@ -52,7 +51,7 @@ export default function RootLayout({
       children: [
         { name: "Partners", link: "/partners" },
         { name: "Become a Partner", link: "/becomeapartner" },
-      ]
+      ],
     },
     {
       name: "Grant Initiatives",
@@ -61,40 +60,29 @@ export default function RootLayout({
         { name: "The SCALE-UP Challenge", link: "/scaleup" },
         { name: "The Bharatpreneurs Challenge", link: "/bharatpreneurs" },
         { name: "The Womenpreneurs Challenge", link: "/womenpreneurs" },
-      ]
+      ],
     },
-    // {
-    //   name: "Special Programs",
-    //   children: [
-    //     { name: "Mentoring", link: "/sparks" },
-    //     { name: "", link: "/scaleup" }
-    //   ]
-    // },
-    {
-      name: "Investors",
-      link: "/investors",
-    },
+    { name: "Investors", link: "/investors" },
   ];
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
+        {/* ✅ Navbar */}
         <Navbar>
-          {/* Desktop Navigation */}
           <NavBody>
             <NavbarLogo />
             <NavItems items={navItems} />
             <div className="flex items-center gap-4">
-              <NavbarButton variant="primary" href="/RegisterNow" target="">
+              <NavbarButton variant="primary" href="/RegisterNow">
                 Register Now
               </NavbarButton>
             </div>
           </NavBody>
 
-          {/* Mobile Navigation */}
+          {/* ✅ Mobile Navigation */}
           <MobileNav>
             <MobileNavHeader>
               <NavbarLogo />
@@ -108,23 +96,17 @@ export default function RootLayout({
               isOpen={isMobileMenuOpen}
               onClose={() => setIsMobileMenuOpen(false)}
             >
-              {/* MODIFIED: Updated mobile menu to render nested items */}
               {navItems.map((item, idx) => (
                 <React.Fragment key={`mobile-link-${idx}`}>
                   <a
-                    href={item.link} // Main link
+                    href={item.link}
                     onClick={() => {
-                      // Only close menu if it's NOT a parent item
-                      // (allows user to click parent link without closing)
-                      if (!item.children) {
-                        setIsMobileMenuOpen(false);
-                      }
+                      if (!item.children) setIsMobileMenuOpen(false);
                     }}
-                    className="relative text-neutral-300 font-semibold" // Make parent bold
+                    className="relative text-neutral-800 font-semibold"
                   >
                     <span className="block">{item.name}</span>
                   </a>
-                  {/* Render children if they exist */}
                   {item.children && (
                     <div className="flex flex-col pl-4 mt-2 space-y-2">
                       {item.children.map((child, cIdx) => (
@@ -132,7 +114,7 @@ export default function RootLayout({
                           key={`mobile-child-${cIdx}`}
                           href={child.link}
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="relative text-neutral-400" // Indent and change color
+                          className="relative text-neutral-600"
                         >
                           <span className="block">{child.name}</span>
                         </a>
@@ -144,7 +126,6 @@ export default function RootLayout({
               <NavbarButton
                 variant="primary"
                 href="/tickets"
-                target=""
                 className="mt-4 w-full"
               >
                 Tickets
@@ -152,7 +133,11 @@ export default function RootLayout({
             </MobileNavMenu>
           </MobileNav>
         </Navbar>
+
+        {/* ✅ Main Content */}
         {children}
+
+        {/* ✅ Footer */}
         <Footer />
       </body>
     </html>

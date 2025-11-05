@@ -12,7 +12,7 @@ const page = () => {
       <div className='m-4'>
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-center my-4">
           Call for <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
-            Voluteers
+            Volunteers
           </span>
         </h1>
         <TextGenerateEffect words={words} />

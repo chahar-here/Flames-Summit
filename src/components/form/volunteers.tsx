@@ -98,7 +98,7 @@ export function VolunteersForm() {
   }
   return (
     
-    <div className="shadow-input mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black">
+<div className="shadow-input mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black/20 backdrop-blur-lg">
       <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300 text-center">Fill this form to apply for volunteering
       </p>
 
