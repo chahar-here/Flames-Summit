@@ -16,23 +16,25 @@ import {
   Timestamp,
   orderBy
 } from "firebase/firestore";
+import AnimatedList from './AnimatedList'
 import { db } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import Image from "next/image";
 import { IconBrandInstagram, IconBrandLinkedin, IconBrandX, IconMail, IconPhone, IconPlus } from "@tabler/icons-react";
 import LoaderOne from "../../../../components/Loder";
-
+import { getVolunteers, submitVolunteerForm, updateVolunteer, deleteVolunteer, approveVolunteer, unapproveVolunteer } from "@/lib/actions";
+import { VolunteersForm } from "@/components/form/volunteersedit";
+import { toast } from "sonner";
+import Image from "next/image";
 // Define a more specific type for our volunteer objects
 type Volunteer = {
   id: string;
-    fullname: string;
-    email: string;
-    phone: string;
-    linkedin: string;
-    role: string;
-    customRole:string;
-    whyJoin: string;
-    approved:boolean;
+  fullname: string;
+  email: string;
+  phone: string;
+  linkedin: string;
+  role: string;
+  customRole: string;
+  whyJoin: string;
+  approved: boolean;
   [key: string]: any; // Allow other properties
 };
 
@@ -45,175 +47,138 @@ export default function VolunteerDashboard() {
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [hasMore, setHasMore] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
   const [newVolunteer, setNewVolunteer] = useState<{
     fullname: string;
     email: string;
     phone: string;
     linkedin: string;
     role: string;
-    customRole:string;
+    customRole: string;
     whyJoin: string;
-    approved:boolean;
-    
+    approved: boolean;
   }>({
-    fullname:"",
+    fullname: "",
     email: "",
     phone: "",
     linkedin: "",
     role: "",
     customRole: "",
     whyJoin: "",
-    approved:false,
+    approved: false,
   });
 
-  // Fetch volunteers with pagination
-  const fetchVolunteers = async (initial = false) => {
-    setLoading(true);
+  // Fetch volunteers
+  const fetchVolunteers = async () => {
     try {
-      let q = query(collection(db, "volunteers"), orderBy("createdAt", "asc"), limit(8));
-      if (!initial && lastVisible) {
-        q = query(q, startAfter(lastVisible));
-      }
-
-      const snapshot = await getDocs(q);
-      const newVolunteers = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Volunteer));
-      
-      if (snapshot.docs.length < 8) setHasMore(false);
-      if (snapshot.docs.length > 0) setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-      
-      setVolunteers((prev) => (initial ? newVolunteers : [...prev, ...newVolunteers]));
+      setLoading(true);
+      const data = await getVolunteers(100); // Get first 100 volunteers
+      setVolunteers(data);
     } catch (error) {
-        console.error("Error fetching volunteers: ", error);
+      console.error("Error fetching volunteers:", error);
+      alert("Failed to fetch volunteers");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchVolunteers(true);
+    fetchVolunteers();
   }, []);
 
-  // --- MODIFIED: Enhanced Delete Function ---
+
+  // Handle delete volunteer
   const handleDelete = async (volunteer: Volunteer) => {
-    if (!window.confirm(`Are you sure you want to permanently delete ${volunteer.fullname}? This action cannot be undone.`)) {
+    if (!window.confirm(`Are you sure you want to delete ${volunteer.fullname}?`)) {
       return;
     }
     try {
-      if (volunteer.approved) {
-        const teamMembersQuery = query(collection(db, "team_members"), where("email", "==", volunteer.email), limit(1));
-        const teamMemberSnapshot = await getDocs(teamMembersQuery);
-        const batch = writeBatch(db);
-
-        if (!teamMemberSnapshot.empty) {
-          const teamMemberDocRef = doc(db, "team_members", teamMemberSnapshot.docs[0].id);
-          batch.delete(teamMemberDocRef);
-        }
-        
-        const applicationDocRef = doc(db, "volunteer_applications", volunteer.id);
-        batch.delete(applicationDocRef);
-        await batch.commit();
+      const result = await deleteVolunteer(volunteer.id);
+      if (result.success) {
+        setVolunteers(prev => prev.filter(v => v.id !== volunteer.id));
       } else {
-        await deleteDoc(doc(db, "volunteer_applications", volunteer.id));
+        throw new Error(result.error || 'Failed to delete volunteer');
       }
-      setVolunteers((prev) => prev.filter((v) => v.id !== volunteer.id));
     } catch (error) {
       console.error("Error deleting volunteer:", error);
-      alert("Failed to delete volunteer.");
+      alert(error instanceof Error ? error.message : "Failed to delete volunteer");
     }
   };
 
-  // --- NEW: Unapprove Function ---
-  const handleUnapprove = async (volunteer: Volunteer) => {
-    if (!window.confirm(`This will remove ${volunteer.fullname} from the public team list and mark their application as pending. Continue?`)) {
-      return;
-    }
+  // Handle approve/unapprove volunteer
+  const handleApproveToggle = async (volunteer: Volunteer) => {
     try {
-      const teamMembersQuery = query(collection(db, "team_members"), where("email", "==", volunteer.email), limit(1));
-      const teamMemberSnapshot = await getDocs(teamMembersQuery);
-      const batch = writeBatch(db);
-
-      if (!teamMemberSnapshot.empty) {
-        const teamMemberDocRef = doc(db, "team_members", teamMemberSnapshot.docs[0].id);
-        batch.delete(teamMemberDocRef);
+      let result;
+      if (volunteer.approved) {
+        result = await unapproveVolunteer(volunteer.id);
+      } else {
+        result = await approveVolunteer(volunteer.id);
       }
 
-      const applicationDocRef = doc(db, "volunteer_applications", volunteer.id);
-      batch.update(applicationDocRef, { approved: false });
-      await batch.commit();
-
-      setVolunteers((prev) =>
-        prev.map((v) => (v.id === volunteer.id ? { ...v, approved: false } : v))
-      );
-    } catch (error) {
-      console.error("Error unapproving volunteer:", error);
-      alert("Failed to unapprove volunteer.");
-    }
-  };
-
-  // Approve a volunteer and add them to the official team
-  const handleApprove = async (volunteer: Volunteer) => {
-    try {
-        const volunteerRef = doc(db, "volunteer_applications", volunteer.id);
-        await updateDoc(volunteerRef, { approved: true });
-        
-        const teamMemberData = { ...volunteer, approved: true, teamJoinDate: Timestamp.now() } as Omit<Volunteer, "id"> & { id?: string };
-        delete teamMemberData.id;
-
-        await addDoc(collection(db, "team_members"), teamMemberData);
-        
-        setVolunteers((prev) =>
-          prev.map((v) => (v.id === volunteer.id ? { ...v, approved: true } : v))
+      if (result.success) {
+        setVolunteers(prev =>
+          prev.map(v =>
+            v.id === volunteer.id
+              ? { ...v, approved: !volunteer.approved }
+              : v
+          )
         );
+      } else {
+        throw new Error(result.error || 'Failed to update volunteer status');
+      }
     } catch (error) {
-        console.error("Error approving volunteer:", error);
-        alert("Failed to approve volunteer.");
+      console.error("Error updating volunteer status:", error);
+      alert(error instanceof Error ? error.message : "Failed to update volunteer status");
     }
   };
 
-  // Handle the submission of the edit form
-  const handleEditSubmit = async () => {
+  // Handle edit volunteer
+  const handleEditSubmit = async (formData: any) => {
     if (!editVolunteer) return;
-    const { id, ...rest } = editVolunteer;
-    let updatedData: Partial<Volunteer> = { ...rest };
 
-    setLoading(true);
     try {
-      await updateDoc(doc(db, "volunteer_applications", id), updatedData);
-      setVolunteers((prev) => prev.map((v) => (v.id === id ? { ...v, ...updatedData } : v)));
-      setEditVolunteer(null);
+      const result = await updateVolunteer(editVolunteer.id, {
+        ...formData,
+        approved: editVolunteer.approved // Preserve approval status
+      });
+
+      if (result.success) {
+        setVolunteers(prev =>
+          prev.map(v =>
+            v.id === editVolunteer.id
+              ? { ...v, ...formData }
+              : v
+          )
+        );
+        setEditVolunteer(null);
+        toast.success("Volunteer updated successfully!");
+      } else {
+        throw new Error(result.error || 'Failed to update volunteer');
+      }
     } catch (error) {
-        console.error("Error updating volunteer: ", error);
-        alert("Failed to update volunteer.");
-    } finally {
-        setLoading(false);
+      console.error("Error updating volunteer:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update volunteer");
     }
   };
 
-  const handleAddVolunteer = async () => {
-    const { fullname, email, role, whyJoin } = newVolunteer;
-    if (!fullname || !email || !role || !whyJoin) {
-        alert("Please fill all required fields and upload a photo.");
-        return;
-    }
+  // Handle add new volunteer
+  const handleAddVolunteer = async (formData: any) => {
     try {
-        setLoading(true);
+      const result = await submitVolunteerForm({
+        ...formData,
+        approved: false
+      });
 
-        const docData = {
-            ...newVolunteer,
-            approved: false,
-            createdAt: Timestamp.now(),
-            guidelinesAccepted: true,
-        };
-
-        const docRef = await addDoc(collection(db, "volunteer_applications"), docData);
-        // setVolunteers(prev => [{ id: docRef.id, ...docData }, ...prev]);
-        setNewVolunteer({ fullname: '', email: '', role: '', whyJoin: '', phone: '', linkedin: '', customRole:'', approved:false });
+      if (result.success) {
+        await fetchVolunteers(); // Refresh the list
         setIsAddModalOpen(false);
+        toast.success("Volunteer added successfully!");
+      } else {
+        throw new Error(result.error || 'Failed to add volunteer');
+      }
     } catch (error) {
-        console.error("Error adding new volunteer:", error);
-        alert("Failed to add new volunteer.");
-    } finally {
-        setLoading(false);
+      console.error("Error adding volunteer:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to add volunteer");
     }
   };
 
@@ -232,17 +197,32 @@ export default function VolunteerDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-[#E62B1E]">Volunteer Applications</h1>
         <div className="flex gap-2">
+          <div className="flex justify-end">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`px-4 py-2 rounded-l-md ${viewMode === "grid" ? "bg-red-600 text-white" : "bg-gray-200 text-black"}`}
+            >
+              Grid View
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`px-4 py-2 rounded-r-md ${viewMode === "list" ? "bg-red-600 text-white" : "bg-gray-200 text-black"}`}
+            >
+              List View
+            </button>
+          </div>
+
           <input
             type="text"
             placeholder="Search by name or role..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-2 border rounded-md w-full md:w-64"
+            className="px-3 py-2 border rounded-md w-full md:w-64 text-white"
           />
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="px-3 py-2 border rounded-md"
+            className="px-3 py-2 border rounded-md text-white"
           >
             <option value="all">All</option>
             <option value="approved">Approved</option>
@@ -258,68 +238,141 @@ export default function VolunteerDashboard() {
       {/* Volunteer Grid */}
       {loading && volunteers.length === 0 ? (
         <div className="h-screen flex items-center justify-center">
-          <LoaderOne/>
-          </div>
-      ) : (
+          <LoaderOne />
+        </div>
+      ) : viewMode === "grid" ? (
+        // 🟦 GRID VIEW
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredVolunteers.map((volunteer) => (
             <div
               key={volunteer.id}
-              className="bg-white rounded-2xl flex flex-col shadow-md border hover:shadow-lg transition-all duration-300 overflow-hidden"
+              className="bg-black rounded-2xl flex flex-col shadow-md border hover:shadow-lg transition-all duration-300 overflow-hidden"
             >
               <div className="relative h-48 w-full">
-                 <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-bold text-white rounded-full ${volunteer.approved ? 'bg-green-600' : 'bg-yellow-600'}`}>
-                    {volunteer.approved ? 'Approved' : 'Pending'}
+                <Image
+                  src="/flames_white.png"
+                  alt="flames-logo"
+                  layout="fill"
+                  className="object-cover"
+                />
+                <div
+                  className={`absolute top-2 right-2 px-2 py-1 text-xs font-bold text-white rounded-full ${volunteer.approved ? "bg-green-600" : "bg-yellow-600"
+                    }`}
+                >
+                  {volunteer.approved ? "Approved" : "Pending"}
                 </div>
               </div>
-        
               <div className="p-4 flex flex-col flex-grow">
-                <h2 className="text-lg font-semibold text-gray-800">{volunteer.fullname}</h2>
+                <h2 className="text-lg font-semibold text-white">{volunteer.fullname}</h2>
                 <p className="text-sm font-medium text-[#E62B1E] mb-2">{volunteer.role}</p>
-                <p className="text-xs text-gray-500 italic mb-4 flex-grow">"{volunteer.whyJoin}"</p>
-                
+                <p className="text-xs text-white italic mb-4 flex-grow">
+                  "{volunteer.whyJoin}"
+                </p>
                 <div className="flex items-center justify-center gap-4 text-gray-500 mb-4 border-t pt-4">
-                    {volunteer.linkedin && <a href={volunteer.linkedin} target="_blank" rel="noopener noreferrer"><IconBrandLinkedin className="hover:text-blue-700" /></a>}
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-2 mt-auto">
-                  {volunteer.approved ? (
-                    <button onClick={() => handleUnapprove(volunteer)} className="bg-orange-500 text-white px-3 py-1 rounded-md text-sm hover:bg-orange-600">Unapprove</button>
-                  ) : (
-                    <button onClick={() => handleApprove(volunteer)} className="bg-green-600 text-white px-3 py-1 rounded-md text-sm hover:bg-green-700">Approve</button>
+                  {volunteer.linkedin && (
+                    <a
+                      href={volunteer.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <IconBrandLinkedin className="hover:text-blue-700" />
+                    </a>
                   )}
-                  <button onClick={() => setEditVolunteer(volunteer)} className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600">Edit</button>
-                  <button onClick={() => handleDelete(volunteer)} className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700">Delete</button>
+                </div>
+                <div className="flex justify-end gap-2 mt-auto">
+                  <button
+                    onClick={() => handleApproveToggle(volunteer)}
+                    className={`px-3 py-1 rounded-md text-sm text-white ${volunteer.approved
+                        ? "bg-orange-500 hover:bg-orange-600"
+                        : "bg-green-600 hover:bg-green-700"
+                      }`}
+                  >
+                    {volunteer.approved ? "Unapprove" : "Approve"}
+                  </button>
+                  <button
+                    onClick={() => setEditVolunteer(volunteer)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(volunteer)}
+                    className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      ) : (
+        // 🟩 LIST VIEW
+<div className="w-full overflow-x-auto">
+  <div className="min-w-[800px] grid grid-cols-6 gap-4 bg-[#111] text-white font-semibold text-sm rounded-t-xl p-3 border-b border-gray-700">
+    <div>Full Name</div>
+    <div>Role</div>
+    <div>Email</div>
+    <div>Phone</div>
+    <div>LinkedIn</div>
+    <div className="text-center">Operations</div>
+  </div>
+
+  {/* Table Rows */}
+<AnimatedList
+  items={volunteers}
+  onItemSelect={(item, index) => console.log(item, index)}
+  showGradients={true}
+  enableArrowNavigation={true}
+  displayScrollbar={true}
+  handleDelete={handleDelete}
+  handleApproveToggle={handleApproveToggle}
+  setEditVolunteer={setEditVolunteer}
+/>
+</div>
+
       )}
+
 
       {/* Load More Button */}
       {hasMore && !loading && (
         <div className="flex justify-center mt-8">
-          <button onClick={() => fetchVolunteers()} className="bg-black text-white px-4 py-2 rounded-lg shadow hover:bg-gray-800 transition-colors">Load More</button>
+          <button
+            onClick={() => fetchVolunteers()}
+            className="bg-black text-white px-4 py-2 rounded-lg shadow hover:bg-gray-800 transition-colors"
+          >
+            Load More
+          </button>
         </div>
       )}
 
-       {isAddModalOpen && (
+      {/* Add Volunteer Modal */}
+      {isAddModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-neutral-900 rounded-lg p-6 max-w-lg w-full shadow-xl">
-            <h2 className="text-xl font-semibold mb-4">Add New Volunteer</h2>
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-              <input className="w-full border px-3 py-2 rounded" placeholder="Full Name *" value={newVolunteer.fullname} onChange={(e) => setNewVolunteer({ ...newVolunteer, fullname: e.target.value })}/>
-              <input type="email" className="w-full border px-3 py-2 rounded" placeholder="Email *" value={newVolunteer.email} onChange={(e) => setNewVolunteer({ ...newVolunteer, email: e.target.value })}/>
-              <input className="w-full border px-3 py-2 rounded" placeholder="Role *" value={newVolunteer.role} onChange={(e) => setNewVolunteer({ ...newVolunteer, role: e.target.value })}/>
-              <textarea className="w-full border px-3 py-2 rounded" placeholder="Why do they want to volunteer? *" value={newVolunteer.whyJoin} onChange={(e) => setNewVolunteer({ ...newVolunteer, whyJoin: e.target.value })}/>
-              <input type="tel" className="w-full border px-3 py-2 rounded" placeholder="Phone" value={newVolunteer.phone} onChange={(e) => setNewVolunteer({ ...newVolunteer, phone: e.target.value })}/>
-              <input type="url" className="w-full border px-3 py-2 rounded" placeholder="LinkedIn URL" value={newVolunteer.linkedin} onChange={(e) => setNewVolunteer({ ...newVolunteer, linkedin: e.target.value })}/>
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Volunteer</h2>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
             </div>
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-              <button className="bg-neutral-600 text-white px-4 py-2 rounded hover:bg-neutral-700" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={handleAddVolunteer}>Add Volunteer</button>
+            <div className="max-h-[70vh] overflow-y-auto pr-2">
+              <VolunteersForm
+                onSubmit={handleAddVolunteer}
+                initialData={{
+                  fullname: "",
+                  email: "",
+                  phone: "",
+                  linkedin: "",
+                  role: "",
+                  customRole: "",
+                  whyJoin: ""
+                }}
+                submitButtonText="Add Volunteer"
+              />
             </div>
           </div>
         </div>
@@ -327,20 +380,30 @@ export default function VolunteerDashboard() {
 
       {/* Edit Modal */}
       {editVolunteer && (
-        <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-neutral-900 rounded-lg p-6 max-w-lg w-full shadow-xl">
-            <h2 className="text-xl font-semibold mb-4">Edit Volunteer Application</h2>
-            <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
-              <input className="w-full border px-3 py-2 rounded" value={editVolunteer.fullname} onChange={(e) => setEditVolunteer({ ...editVolunteer, fullname: e.target.value })} placeholder="Full Name"/>
-              <input className="w-full border px-3 py-2 rounded" value={editVolunteer.email} onChange={(e) => setEditVolunteer({ ...editVolunteer, email: e.target.value })} placeholder="Email"/>
-              <input className="w-full border px-3 py-2 rounded" value={editVolunteer.mobile} onChange={(e) => setEditVolunteer({ ...editVolunteer, mobile: e.target.value })} placeholder="Phone"/>
-              <input className="w-full border px-3 py-2 rounded" value={editVolunteer.role} onChange={(e) => setEditVolunteer({ ...editVolunteer, role: e.target.value })} placeholder="Role"/>
-              <textarea className="w-full border px-3 py-2 rounded min-h-[100px]" value={editVolunteer.whyVolunteer} onChange={(e) => setEditVolunteer({ ...editVolunteer, whyVolunteer: e.target.value })} placeholder="Why they want to volunteer"/>
-              <input className="w-full border px-3 py-2 rounded" value={editVolunteer.linkedin} onChange={(e) => setEditVolunteer({ ...editVolunteer, linkedin: e.target.value })} placeholder="LinkedIn URL"/>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-black rounded-lg border border-gray-700 p-6 w-full max-w-2xl shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-white">Edit Volunteer</h2>
+              <button
+                onClick={() => setEditVolunteer(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button className="bg-neutral-600 text-white px-4 py-2 rounded hover:bg-neutral-700" onClick={() => setEditVolunteer(null)}>Cancel</button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={handleEditSubmit}>Save Changes</button>
+            <div className="max-h-[70vh] overflow-y-auto pr-2">
+              <VolunteersForm
+                onSubmit={handleEditSubmit}
+                initialData={{
+                  fullname: editVolunteer.fullname,
+                  email: editVolunteer.email,
+                  phone: editVolunteer.phone,
+                  linkedin: editVolunteer.linkedin || "",
+                  role: editVolunteer.role,
+                  customRole: editVolunteer.customRole || "",
+                  whyJoin: editVolunteer.whyJoin
+                }}
+              />
             </div>
           </div>
         </div>

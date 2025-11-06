@@ -1,6 +1,9 @@
+import { InteractiveDotBackground } from "@/components/ui/InteractiveDotBackground";
 import React from "react";
 
 export default function AdminDashboardPage() {
-    return <div>Holla Admins
+    return <div>
+        <InteractiveDotBackground />
+        Holla Admins
     </div>
 }
