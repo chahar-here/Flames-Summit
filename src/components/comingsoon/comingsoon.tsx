@@ -54,7 +54,7 @@ export default function ComingSoonPage() {
     setStatus('success');
     setMessage('Thank you for subscribing! We\'ll be in touch.');
     setEmail('');
-  } catch (error) {
+  } catch (error:any) {
     console.error("Full error object: ", error);
     console.error("Error code: ", error.code);
     console.error("Error message: ", error.message);
