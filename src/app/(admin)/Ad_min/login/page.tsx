@@ -3,28 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "motion/react"; // Assuming you're using motion/react for animations
-import { cn } from "@/lib/utils"; // For combining Tailwind classes
-// --- NEW IMPORTS ---
+import { motion } from "motion/react"; 
+import { cn } from "@/lib/utils"; 
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase"; // Import your client-side auth
-// ---
+import { auth } from "@/lib/firebase"; // Import your 
 
-// You'll need an authentication function here (e.g., Firebase Auth, NextAuth.js)
-// For now, it's a placeholder.
-
-// async function authenticateUser(email: string, password: string) {
-//   return new Promise((resolve) => {
-//     setTimeout(() => {
-//       if (email === "test@example.com" && password === "password") {
-//         resolve({ success: true, message: "Login successful!" });
-//       } else {
-//         resolve({ success: false, error: "Looks like, we don't know you!" });
-//       }
-//     }, 1500);
-//   });
-// }
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,24 +17,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const router = useRouter(); // For redirecting
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setError(null);
-  //   setIsLoading(true);
-
-  //   const result: any = await authenticateUser(email, password); // Replace with your actual auth logic
-
-  //   if (result.success) {
-  //     // Redirect to dashboard or home page
-  //     console.log(result.message);
-  //     // For a real app: router.push('/dashboard');
-  //   } else {
-  //     setError(result.error);
-  //   }
-  //   setIsLoading(false);
-  // };
+  const router = useRouter(); // For redirecting after login
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +61,7 @@ export default function LoginPage() {
     <div
       className={cn(
         "flex min-h-screen items-center justify-center",
-        "relative z-10" // Ensure this is above the InteractiveGridBackground
+        "relative z-10 bg-black" // Ensure this is above the InteractiveGridBackground
       )}
     >
         <div className={cn(
