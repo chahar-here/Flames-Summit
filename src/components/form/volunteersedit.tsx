@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { Label } from "../../components/ui/label";
-import { Input } from "../../components/ui/input";
-import { Select } from "../../components/ui/select";
-import { Textarea } from "../../components/ui/textarea";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Select } from "../ui/select";
+import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import Loder from "../../components/Loder";
+import Loder from "../Loder";
 import { useRouter } from "next/navigation";
 
 // --- MODIFIED IMPORTS ---
@@ -18,15 +18,33 @@ import {
 // We no longer need client-side 'db', 'addDoc', or 'collection'
 // ---
 
-export function VolunteersForm() {
+interface VolunteersFormProps {
+  onSubmit: (data: any) => Promise<void>;
+  initialData?: {
+    fullname: string;
+    email: string;
+    phone: string;
+    linkedin: string;
+    role: string;
+    customRole: string;
+    whyJoin: string;
+  };
+  submitButtonText?: string;
+}
+
+export function VolunteersForm({ 
+  onSubmit, 
+  initialData, 
+  submitButtonText = 'Submit' 
+}: VolunteersFormProps) {
   const [formData, setFormData] = useState({
-    fullname: "",
-    email: "",
-    phone: "",
-    linkedin: "",
-    role: "", // This is now just for tracking the form, not final data
-    customRole: "",
-    whyJoin: "",
+    fullname: initialData?.fullname || "",
+    email: initialData?.email || "",
+    phone: initialData?.phone || "",
+    linkedin: initialData?.linkedin || "",
+    role: initialData?.role || "",
+    customRole: initialData?.customRole || "",
+    whyJoin: initialData?.whyJoin || "",
   });
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,20 +100,17 @@ export function VolunteersForm() {
       phone: formData.phone,
       linkedin: formData.linkedin,
       role: finalRole,
-      customRole: formData.customRole,
+      customRole: formData.customRole, // Add customRole
       whyJoin: formData.whyJoin,
-      approved: false
+      approved: false // Default to false for new applications
     };
 
     try {
-      // 2. Call the new server action
-      const result = await submitVolunteerForm(applicationData);
-
-      if (result.success) {
-        // 3. Handle success (same as your original code)
-        toast.success(result.message || "Application submitted successfully!");
-
-        // Reset form
+      // Call the provided onSubmit handler
+      await onSubmit(applicationData);
+      
+      // Reset form if this is not an edit form
+      if (!initialData) {
         setFormData({
           fullname: "",
           email: "",
@@ -106,11 +121,6 @@ export function VolunteersForm() {
           whyJoin: "",
         });
         setSelectedRole("");
-        router.push("callforvolunteers/success");
-              setLoading(false);
-      } else {
-        // 4. Handle error from the server
-        toast.error(result.error || "Failed to submit application.");
       }
     } catch (error) {
       console.error("Error submitting form: ", error);
@@ -129,23 +139,9 @@ export function VolunteersForm() {
   // --- All JSX below this line is IDENTICAL to your original file ---
   return (
     <div className="shadow-input mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black/80">
-      <h1 className="text-3xl text-white md:text-5xl font-bold tracking-tight text-center my-4">
-        Call for{" "}
-        <span className=" bg-clip-text bg-gradient-to-r text-[#eb0028]">
-          Voluteers
-        </span>
-      </h1>
-      <p className="mt-2 max-w-sm text-sm text-neutral-300 text-center">
-        Join the
-        <span className="text-[#b62129] font-semibold"> Flames Summit India </span>
-        Volunteer Team and be part of something meaningful.
-      </p>
-      <p className="text-center mt-1 text-white">
-        Questions?
-        <span className="text-[#b62129] font-medium"> info@flamessummit.org</span>
-      </p>
 
       <form className="mt-8" onSubmit={handleSubmit}>
+        <div className="space-y-4">
         <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
           <LabelInputContainer>
             <Label htmlFor="fullname">Full name <span className="text-red-500">*</span></Label>
@@ -257,6 +253,8 @@ export function VolunteersForm() {
         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent dark:via-[#E62B1E]/80" />
 
         <div className="flex flex-col space-y-4"></div>
+
+        </div>
       </form>
     </div>
   );

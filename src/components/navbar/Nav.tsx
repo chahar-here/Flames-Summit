@@ -181,7 +181,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
           className="relative"
         >
           <a
-            onClick={onItemClick}
+            
             className="relative px-4 py-2 text-neutral-300"
             href={item.link}
           >
