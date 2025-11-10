@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 // --- MODIFIED IMPORTS ---
 // We import the server action and its data type
 import {
+  checkVolunteerUniqueness,
   submitVolunteerForm,
   VolunteerApplicationData,
 } from "@/lib/actions";
@@ -31,7 +32,14 @@ export function VolunteersForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);// Validate email format
+const isValidEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+// Validate Indian phone number (e.g., +91 or 10 digits)
+const isValidPhone = (phone: string) =>
+  /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone);
+
 
   // This logic remains the same
   const handleChange = (
@@ -66,36 +74,59 @@ export function VolunteersForm() {
   };
 
   // --- MODIFIED SUBMIT HANDLER ---
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  if (isSubmitting) return;
+  setIsSubmitting(true);
+  setLoading(true);
 
-    // 1. Create the clean data object to send to the server
-    const finalRole =
-      selectedRole === "other" ? formData.customRole : selectedRole;
+  // ✅ Step 1: Basic format validation
+  if (!isValidEmail(formData.email)) {
+    toast.error("Please enter a valid email address.");
+    setIsSubmitting(false);
+    setLoading(false);
+    return;
+  }
 
-    const applicationData: VolunteerApplicationData = {
-      fullname: formData.fullname,
-      email: formData.email,
-      phone: formData.phone,
-      linkedin: formData.linkedin,
-      role: finalRole,
-      customRole: formData.customRole,
-      whyJoin: formData.whyJoin,
-      approved: false
-    };
+  if (!isValidPhone(formData.phone)) {
+    toast.error("Please enter a valid Indian phone number.");
+    setIsSubmitting(false);
+    setLoading(false);
+    return;
+  }
 
-    try {
-      // 2. Call the new server action
-      const result = await submitVolunteerForm(applicationData);
+  // ✅ Step 2: Check uniqueness from Firestore
+  const uniqueness = await checkVolunteerUniqueness(formData.email, formData.phone);
 
-      if (result.success) {
-        // 3. Handle success (same as your original code)
-        toast.success(result.message || "Application submitted successfully!");
+  if (!uniqueness.success) {
+    toast.error(uniqueness.message);
+    setIsSubmitting(false);
+    setLoading(false);
+    return;
+  }
 
-        // Reset form
+  // ✅ Step 3: Continue existing logic
+  const finalRole = selectedRole === "other" ? formData.customRole : selectedRole;
+
+  const applicationData: VolunteerApplicationData = {
+    fullname: formData.fullname,
+    email: formData.email,
+    phone: formData.phone,
+    linkedin: formData.linkedin,
+    role: finalRole,
+    customRole: formData.customRole,
+    whyJoin: formData.whyJoin,
+    approved: false,
+  };
+
+  try {
+    const result = await submitVolunteerForm(applicationData);
+
+    if (result.success) {
+      toast.success(result.message || "Application submitted successfully!");
+      router.push("/callforvolunteers/success");
+
+      setTimeout(() => {
         setFormData({
           fullname: "",
           email: "",
@@ -106,24 +137,28 @@ export function VolunteersForm() {
           whyJoin: "",
         });
         setSelectedRole("");
-        router.push("callforvolunteers/success");
-              setLoading(false);
-      } else {
-        // 4. Handle error from the server
-        toast.error(result.error || "Failed to submit application.");
-      }
-    } catch (error) {
-      console.error("Error submitting form: ", error);
-      toast.error("An unexpected error occurred. Please try again.");
-            setLoading(false);
-    } finally {
-      setIsSubmitting(false);
+        setLoading(false);
+      }, 300);
+    } else {
+      toast.error(result.error || "Failed to submit application.");
+      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    toast.error("An unexpected error occurred. Please try again.");
+    setLoading(false);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
   // --- END OF MODIFIED HANDLER ---
 
   if (loading) {
-    return <LoaderOne />;
+    return <div className="flex items-center justify-center h-screen w-full">
+      <LoaderOne />
+    </div>
   }
 
   // --- All JSX below this line is IDENTICAL to your original file ---
@@ -245,9 +280,8 @@ export function VolunteersForm() {
         </LabelInputContainer>
 
         <button
-          className={`group/btn relative block h-10 w-full rounded-md bg-gradient-to-br font-medium text-white bg-zinc-800 from-zinc-900 to-zinc-900 shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] ${
-            isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-          }`}
+          className={`group/btn relative block h-10 w-full rounded-md bg-gradient-to-br font-medium text-white bg-zinc-800 from-zinc-900 to-zinc-900 shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+            }`}
           disabled={isSubmitting}
           type="submit"
         >

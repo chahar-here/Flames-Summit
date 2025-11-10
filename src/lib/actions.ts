@@ -78,6 +78,37 @@ export interface VolunteerDataWithId extends Omit<VolunteerApplicationData, 'id'
   id: string;
 }
 
+// ✅ Check if email or phone already exists in Firestore
+export const checkVolunteerUniqueness = async (email: string, phone: string) => {
+  try {
+    const emailQuery = await adminDb
+      .collection('volunteers')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+
+    if (!emailQuery.empty) {
+      return { success: false, field: 'email', message: 'This email is already registered.' };
+    }
+
+    const phoneQuery = await adminDb
+      .collection('volunteers')
+      .where('phone', '==', phone)
+      .limit(1)
+      .get();
+
+    if (!phoneQuery.empty) {
+      return { success: false, field: 'phone', message: 'This phone number is already registered.' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error checking uniqueness:', error);
+    return { success: false, message: 'Failed to validate uniqueness.' };
+  }
+};
+
+
 // ✅ Submit new volunteer form
 export const submitVolunteerForm = async (formData: VolunteerApplicationData) => {
   const { fullname, email, role, whyJoin } = formData;
