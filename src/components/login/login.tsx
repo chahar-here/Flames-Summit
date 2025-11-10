@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../lib/firebase";
+import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Input } from "@/app/components/ui/input";
+import { Input } from "@/components/ui/input";
 
 export function Login() {
   const router = useRouter();

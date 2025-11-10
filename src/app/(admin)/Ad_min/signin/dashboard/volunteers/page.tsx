@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import VolunteerDashboard from "@/components/volunteers";
+import VolunteerDashboard from "@/components/ui/volunteers";
 import { getVolunteers } from "@/lib/actions"; // Ensure this works client-side
 import { InteractiveDotBackground } from "@/components/ui/InteractiveDotBackground";
 
