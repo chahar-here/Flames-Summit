@@ -2,8 +2,7 @@ import React from 'react'
 
 const Lorenz = () => {
   return (
-    <div>Hi Lorenz</div>
+    <div>Hi Lorenz hi hello</div>
   )
 }
-
 export default Lorenz
