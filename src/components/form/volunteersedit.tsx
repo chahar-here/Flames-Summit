@@ -6,7 +6,7 @@ import { Select } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import Loder from "../Loder";
+import { LoaderOne } from "@/components/ui/loader";
 import { useRouter } from "next/navigation";
 
 // --- MODIFIED IMPORTS ---
@@ -133,7 +133,7 @@ export function VolunteersForm({
   // --- END OF MODIFIED HANDLER ---
 
   if (loading) {
-    return <Loder />;
+    return <LoaderOne />;
   }
 
   // --- All JSX below this line is IDENTICAL to your original file ---

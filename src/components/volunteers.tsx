@@ -19,7 +19,7 @@ import {
 import AnimatedList from './AnimatedList'
 import { db } from "@/lib/firebase";
 import { IconBrandInstagram, IconBrandLinkedin, IconBrandX, IconMail, IconPhone, IconPlus } from "@tabler/icons-react";
-import LoaderOne from "../../../../components/Loder";
+import {LoaderOne} from "@/components/ui/loader";
 import { getVolunteers, submitVolunteerForm, updateVolunteer, deleteVolunteer, approveVolunteer, unapproveVolunteer } from "@/lib/actions";
 import { VolunteersForm } from "@/components/form/volunteersedit";
 import { toast } from "sonner";

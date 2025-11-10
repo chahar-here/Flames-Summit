@@ -16,17 +16,8 @@ import {
   NavItems,
   NavItem,
 } from "@/components/navbar/Nav";
+import { inter, jetbrainsMono } from '../fonts';
 import { Footer } from "@/components/footer/footer";
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
 
 export default function RootLayout({
   children,

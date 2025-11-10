@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { db } from '../../lib/firebase'; // Assuming your firebase config is in 'lib/firebase.ts'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { SubscribeForm } from '../ui/SubscribeForm';
 
 // You can use a library like 'lucide-react' for icons, or use SVGs directly like this.
 const CalendarIcon = () => (
@@ -17,61 +18,6 @@ export default function ComingSoonPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
-  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   setStatus('loading');
-  //   setMessage('');
-
-  //   try {
-  //     // Add a new document to the "subscribers" collection in Firestore
-  //     await addDoc(collection(db, "subscribers"), {
-  //       email: email,
-  //       subscribedAt: serverTimestamp()
-  //     });
-  //     setStatus('success');
-  //     setMessage('Thank you for subscribing! We\'ll be in touch.');
-  //     setEmail(''); // Clear the input field on success
-  //   } catch (error) {
-  //     console.error("Error adding document: ", error);
-  //     setStatus('error');
-  //     setMessage('Something went wrong. Please try again.');
-  //   }
-  // };
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setStatus('loading');
-  setMessage('');
-
-  try {
-    console.log('Attempting to add subscriber:', email); // Debug log
-    
-    const docRef = await addDoc(collection(db, "subscribers"), {
-      email: email,
-      subscribedAt: serverTimestamp()
-    });
-    
-    console.log('Document written with ID: ', docRef.id); // Debug log
-    setStatus('success');
-    setMessage('Thank you for subscribing! We\'ll be in touch.');
-    setEmail('');
-  } catch (error) {
-    console.error("Full error object: ", error);
-    console.error("Error code: ", error.code);
-    console.error("Error message: ", error.message);
-    
-    setStatus('error');
-    
-    // Provide more specific error messages
-    if (error.code === 'permission-denied') {
-      setMessage('Access denied. Please check your permissions.');
-    } else if (error.code === 'unavailable') {
-      setMessage('Service temporarily unavailable. Please try again.');
-    } else {
-      setMessage('Something went wrong. Please try again.');
-    }
-  }
-};
-
   return (
     <main className="relative text-white min-h-screen flex flex-col items-center justify-center p-8 overflow-hidden">
       {/* Animated Starfield Background */}
@@ -83,7 +29,7 @@ export default function ComingSoonPage() {
       
       <div className="relative z-10 text-center flex flex-col items-center w-full">
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#eb0028] to-[#b62129]">
             FLAMES
           </span> SUMMIT 2026
         </h1>
@@ -95,39 +41,17 @@ export default function ComingSoonPage() {
         <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-10 mt-10 text-lg">
           <div className="flex items-center">
             <CalendarIcon />
-            <span>March 2026</span>
+            <span>April 2026</span>
           </div>
           <div className="flex items-center">
             <MapPinIcon />
-            <span>Mohali, Punjab</span>
+            <span>New Delhi, India</span>
           </div>
         </div>
 
-        <div className="mt-12 w-full max-w-lg">
-          <p className="font-semibold text-xl">Be the first to know when we launch.</p>
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mt-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
-              required
-              disabled={status === 'loading'}
-              className="flex-grow w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-md focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all placeholder:text-gray-500 disabled:opacity-50"
-            />
-            <button
-              type="submit"
-              disabled={status === 'loading'}
-              className="px-6 sm:w-auto py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold rounded-md transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {status === 'loading' ? 'Subscribing...' : 'Notify Me'}
-            </button>
-          </form>
-          {message && (
-            <p className={`mt-4 text-sm ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-              {message}
-            </p>
-          )}
+        <div className="mt-4 w-full max-w-lg">
+          <p className="font-semibold text-xl mb-4">Be the first to know when we launch.</p>
+        <SubscribeForm/>
         </div>
       </div>
     </main>

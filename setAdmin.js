@@ -13,7 +13,7 @@ admin.initializeApp({
 });
 
 // --- SET YOUR ADMIN UID HERE ---
-const uidToMakeAdmin = "PJhwrj7X6ARfTtY1pmb088vKqMn1"; 
+const uidToMakeAdmin = "FprYshLtEcfhxlSmJyWlRC1f6MJ3"; 
 // Replace with the UID of the user you want to make admin
 // ---------------------------------
 

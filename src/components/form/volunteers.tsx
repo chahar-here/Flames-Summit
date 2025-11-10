@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { Label } from "../../components/ui/label";
-import { Input } from "../../components/ui/input";
-import { Select } from "../../components/ui/select";
-import { Textarea } from "../../components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import Loder from "../../components/Loder";
+import { LoaderOne } from "@/components/ui/loader";
 import { useRouter } from "next/navigation";
 
 // --- MODIFIED IMPORTS ---
@@ -123,7 +123,7 @@ export function VolunteersForm() {
   // --- END OF MODIFIED HANDLER ---
 
   if (loading) {
-    return <Loder />;
+    return <LoaderOne />;
   }
 
   // --- All JSX below this line is IDENTICAL to your original file ---
