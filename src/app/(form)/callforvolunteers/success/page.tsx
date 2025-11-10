@@ -1,71 +1,75 @@
 'use client';
 
-import { InteractiveDotBackground } from '@/components/ui/InteractiveDotBackground';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
-// Dynamically import Confetti (client-only)
-const Confetti = dynamic(() => import('react-confetti'), { 
-  ssr: false,
-  loading: () => null // Add loading state
-});
-
-const SuccessPage = () => {
+export default function SuccessPage() {
   const router = useRouter();
-  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  const [isMounted, setIsMounted] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    const updateSize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
+    setShowPopup(true);
 
-    // Only run on client side
-    if (typeof window !== 'undefined') {
-      updateSize();
-      window.addEventListener('resize', updateSize);
-    }
+    // Auto redirect after 3 seconds
+    const timer = setTimeout(() => {
+      setShowPopup(false);
+      router.push('/');
+    }, 3000);
 
-    const timer = setTimeout(() => router.push('/'), 5000);
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('resize', updateSize);
-      }
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [router]);
 
-  // Don't render until mounted on client
-  if (!isMounted) {
-    return (
-      <div className="min-h-screen bg-transparent flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative min-h-screen bg-transparent">
-      <InteractiveDotBackground />
-      <div className="fixed inset-0 z-50 bg-transparent flex flex-col items-center justify-center">
-        {isMounted && windowSize.width > 0 && windowSize.height > 0 && (
-          <Confetti
-            width={windowSize.width}
-            height={windowSize.height}
-            recycle={false}
-            numberOfPieces={500}
-          />
+    <div className="min-h-screen flex items-center justify-center bg-black text-white px-4 relative overflow-hidden">
+      {/* 🔥 Subtle moving red glow background */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,0,0,0.2)_0%,transparent_60%)] animate-pulse" />
+
+      <AnimatePresence>
+        {showPopup && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.4 }}
+            className="relative z-10 backdrop-blur-xl bg-[rgba(20,20,20,0.85)] border border-[rgba(255,0,0,0.3)] shadow-[0_0_30px_rgba(255,0,0,0.3)] rounded-2xl max-w-md w-full p-6 text-center"
+          >
+            <div className="flex flex-col items-center">
+              <Image
+                src="/flames_white.png"
+                alt="Flames Summit Logo"
+                width={100}
+                height={100}
+                className="mb-4"
+              />
+
+              {/* 🔥 Red headline */}
+              <h1 className="text-2xl font-bold text-red-500 mb-2">
+                Volunteer Form Submitted 🎉
+              </h1>
+
+              <p className="text-gray-300 mb-4">
+                Thank you for showing interest in becoming a <strong className="text-red-400">Flames Summit Volunteer</strong>!
+              </p>
+
+              <p className="text-gray-400">
+                Our team will review your application and connect with you soon.  
+                Redirecting to homepage...
+              </p>
+
+              {/* 🔥 Red Spinner */}
+              <motion.div
+                className="mt-6 w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin"
+                transition={{ repeat: Infinity }}
+              />
+            </div>
+
+            {/* 🔥 Optional glowing border animation */}
+            <div className="absolute inset-0 rounded-2xl pointer-events-none border border-red-600/30 blur-sm animate-pulse" />
+          </motion.div>
         )}
-        {/* ... rest of your JSX ... */}
-      </div>
+      </AnimatePresence>
     </div>
   );
-};
-
-export default SuccessPage;
+}
