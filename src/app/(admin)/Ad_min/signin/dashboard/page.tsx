@@ -1,10 +1,10 @@
 // /app/dashboard/page.tsx
-import OverviewCard from "../../../../../components/OverviewCard";
-import GoalsCard from "../../../../../components/GoalsCard";
-import TaskList from "../../../../../components/TaskList";
-import WeeklyProgressChart from "../../../../../components/WeeklyProgressChart";
-import MonthProgressChart from "../../../../../components/MonthProgressChart";
-import ProjectList from "../../../../../components/ProjectList";
+import OverviewCard from "@/components/ui/OverviewCard";
+import GoalsCard from "@/components/ui/GoalsCard";
+import TaskList from "@/components/ui/TaskList";
+import WeeklyProgressChart from "@/components/ui/WeeklyProgressChart";
+import MonthProgressChart from "@/components/ui/MonthProgressChart";
+import ProjectList from "@/components/ui/ProjectList";
 
 export default function DashboardPage() {
   return (

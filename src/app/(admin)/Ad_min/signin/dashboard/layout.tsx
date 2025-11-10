@@ -1,5 +1,5 @@
 "use client";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/sidebar";
+import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { MdAttachMoney, MdDiscount } from "react-icons/md";
 import {
   IconBrandTabler,

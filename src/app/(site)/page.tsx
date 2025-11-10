@@ -1,5 +1,4 @@
 import ComingSoonPage from "@/components/comingsoon/comingsoon";
-import ParticlesComponent from "@/components/ParticlesComponent";
 import { InteractiveDotBackground } from "@/components/ui/InteractiveDotBackground";
 import { GridSmallBackgroundDemo } from "@/components/ui/InteractiveGridBackgroung";
 import { cn } from "@/lib/utils";
