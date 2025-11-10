@@ -5,4 +5,3 @@ const Lorenz = () => {
     <div>Hi Lorenz hi hello</div>
   )
 }
-export default Lorenz
