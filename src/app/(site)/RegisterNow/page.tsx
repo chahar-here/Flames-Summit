@@ -1,35 +1,19 @@
 "use client";
-
 import React, { useState } from "react";
 import Link from "next/link";
-import { IconSend } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { SubscribeForm } from "@/components/ui/SubscribeForm";
+import { DotsBackground } from "@/components/ui/InteractiveDotBackground";
 
 export default function RegisterationsPage() {
   const [email, setEmail] = useState("");
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Here you would handle the email submission to Firebase/Firestore
-    console.log("Email submitted:", email);
-    // Add a 'submitting' or 'success' state here
-    setEmail("");
-    alert("Thanks for registering your interest!");
-  };
 
   return (
     // This main container centers your content.
     // 'relative z-10' ensures it's on top of your background grid.
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 text-center">
-      <div className={cn(
-              "fixed inset-0 -z-50",
-              "[background-size:20px_20px]",
-              "[background-image:radial-gradient(#404040_1px,transparent_1px)]", "-z-50",
-              // ADDED: This mask applies to the entire container, fading both layers
-        "[mask-image:radial-gradient(ellipse_at_center,white_50%,transparent_100%)]",
-            )}/>
+      <DotsBackground />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
