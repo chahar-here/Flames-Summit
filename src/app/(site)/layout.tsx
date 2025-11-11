@@ -25,35 +25,35 @@ export default function RootLayout({
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems: NavItem[] = [
-    { name: "About", link: "/about" },
-    {
-      name: "Conference",
-      link: "/conference",
-      children: [
-        { name: "Speakers", link: "/speakers" },
-        { name: "Schedule", link: "/schedule" },
-        { name: "Workshops", link: "/workshops" },
-      ],
-    },
-    {
-      name: "Partners",
-      children: [
-        { name: "Partners", link: "/partners" },
-        { name: "Become a Partner", link: "/becomeapartner" },
-      ],
-    },
-    {
-      name: "Grant Initiatives",
-      children: [
-        { name: "The SPARK Challenge", link: "/sparks" },
-        { name: "The SCALE-UP Challenge", link: "/scaleup" },
-        { name: "The Bharatpreneurs Challenge", link: "/bharatpreneurs" },
-        { name: "The Womenpreneurs Challenge", link: "/womenpreneurs" },
-      ],
-    },
-    { name: "Investors", link: "/investors" },
-  ];
+  // const navItems: NavItem[] = [
+  //   { name: "About", link: "/about" },
+  //   {
+  //     name: "Conference",
+  //     link: "/conference",
+  //     children: [
+  //       { name: "Speakers", link: "/speakers" },
+  //       { name: "Schedule", link: "/schedule" },
+  //       { name: "Workshops", link: "/workshops" },
+  //     ],
+  //   },
+  //   {
+  //     name: "Partners",
+  //     children: [
+  //       { name: "Partners", link: "/partners" },
+  //       { name: "Become a Partner", link: "/becomeapartner" },
+  //     ],
+  //   },
+  //   {
+  //     name: "Grant Initiatives",
+  //     children: [
+  //       { name: "The SPARK Challenge", link: "/sparks" },
+  //       { name: "The SCALE-UP Challenge", link: "/scaleup" },
+  //       { name: "The Bharatpreneurs Challenge", link: "/bharatpreneurs" },
+  //       { name: "The Womenpreneurs Challenge", link: "/womenpreneurs" },
+  //     ],
+  //   },
+  //   { name: "Investors", link: "/investors" },
+  // ];
 
   return (
     <html lang="en">
@@ -61,7 +61,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
         {/* ✅ Navbar */}
-        <Navbar>
+        {/* <Navbar>
           <NavBody>
             <NavbarLogo />
             <NavItems items={navItems} />
@@ -71,8 +71,6 @@ export default function RootLayout({
               </NavbarButton>
             </div>
           </NavBody>
-
-          {/* ✅ Mobile Navigation */}
           <MobileNav>
             <MobileNavHeader>
               <NavbarLogo />
@@ -122,7 +120,7 @@ export default function RootLayout({
               </NavbarButton>
             </MobileNavMenu>
           </MobileNav>
-        </Navbar>
+        </Navbar> */}
 
         {/* ✅ Main Content */}
         {children}
