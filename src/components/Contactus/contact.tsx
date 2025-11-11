@@ -6,6 +6,8 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
+import { IconBrandInstagram, IconBrandLinkedin, IconBrandX } from "@tabler/icons-react";
+
 export function Contact() {
   const[fullName, setFullName] = useState('');
   const[email, setEmail] = useState('');
@@ -20,6 +22,7 @@ export function Contact() {
   setError([]);
 
   try {
+    console.log("sending:", { fullName, email, message });
     await addDoc(collection(db, "contacts"), {
       fullName,
       email,
@@ -37,7 +40,8 @@ export function Contact() {
   }
 };
   return (
-    <div className="shadow-input mx-auto w-full sm:max-w-[90vw] md:max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black">
+    <div className="flex items-center justify-center min-h-screen w-full px-4">
+      <div className="shadow-input mx-auto w-full sm:max-w-[90vw] md:max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black">
       {/* Headings */}
       <h2 className="text-xl font-bold text-neutral-200 text-center">
         Got a <span className="text-[#E62B1E]">Spark?</span>
@@ -51,18 +55,29 @@ export function Contact() {
         <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
           <LabelInputContainer>
             <Label htmlFor="firstname">Full name</Label>
-            <Input id="firstname" onChange={(e) => setFullName(e.target.value)} value={fullName} placeholder="Hello" type="text" />
+            <Input 
+            id="firstname" onChange={(e) => setFullName(e.target.value)} 
+            value={fullName} 
+            placeholder="Stanley Ipkiss" 
+            type="text" />
           </LabelInputContainer>
         </div>
         {/* Email */}
         <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" onChange={(e) => setEmail(e.target.value)} value={email}  placeholder="email@email.com" type="email" />
+          <Input 
+          id="email" onChange={(e) => setEmail(e.target.value)} 
+          value={email}  
+          placeholder="email@email.com" 
+          type="email" />
         </LabelInputContainer>
         {/* Message */}
         <LabelInputContainer className="mb-4">
           <Label htmlFor="message">Message!</Label>
-          <Textarea id="message" onChange={(e) => setMessage(e.target.value)} value={message} placeholder="Type Here!" />
+          <Textarea 
+          id="message" onChange={(e) => setMessage(e.target.value)} 
+          value={message} 
+          placeholder="Type Here!" />
         </LabelInputContainer>
         {/* Contact Us Button */}
         <button
@@ -88,6 +103,19 @@ export function Contact() {
         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent dark:via-[#E62B1E]/80" />
 
       </form>
+      {/* Social Media links */}
+            <div className="flex items-center justify-center mt-6 space-x-10">
+              <a href="https://x.com/flamessummit" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition">
+                <IconBrandX size={30}/>
+              </a>
+              <a href="https://www.linkedin.com/company/flamessummitindia" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition">
+                <IconBrandLinkedin size={30}/>
+              </a>
+              <a href="https://www.instagram.com/flamessummitindia" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition">
+                <IconBrandInstagram size={32}/>
+              </a>
+            </div>
+    </div>
     </div>
   );
 };

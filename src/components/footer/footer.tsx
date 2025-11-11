@@ -12,8 +12,8 @@ export function Footer() {
         {/* Grid layout for footer */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-24 mb-10">
           {/* Logo & Social Media links*/}
-          <div className=" w-full flex-col items-center justify-center md:justify-start">
-            <Link href="/" className="inline-block">
+          <div className=" w-full flex-col items-center justify-center ">
+            <Link href="/" className="flex items-center justify-center w-full">
             <Image
               src="/flames_white.png"
               alt="Tedxsviet"
@@ -38,14 +38,14 @@ export function Footer() {
           {/* Navigation Links */}
           <div className="text-center md:text-left font-semibold text-md flex md:flex-col gap-4 justify-center">
             {/* <h3 className="text-lg font-semibold text-white">Quick Links</h3> */}
-                <Link href="/partenerwithus" className="hover:text-white transition">
+                <Link href="/" className="hover:text-white transition">
                  Partner with us
                 </Link>
                 <Link href="/callforvolunteers" className="hover:text-white transition">
                   Become a Volunteer
                 </Link>
-                <Link href="/faqs" className="hover:text-white transition">
-                  FAQs
+                <Link href="/contact" className="hover:text-white transition">
+                  Contact Us
                 </Link>
           </div>
           {/* Contact Information */}
@@ -56,7 +56,7 @@ export function Footer() {
             <p className="hover:text-white transition">Location: Chandigarh, India</p>
           </div>
           {/* Subscribe us */}
-          <div className="flex flex-col gap-2 items-center justify-center md:items-start">
+          <div className="flex flex-col gap-2 items-center justify-center">
             {/* Subscribe Now */}
             <SubscribeForm/>
           </div>
@@ -65,14 +65,14 @@ export function Footer() {
         {/* Divider + Copyright */}
         <hr className="border-[#E62B1E] sm:block" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-bold text-sm text-center mt-6">
-          <Link href="/guidelines" className="hover:text-white transition md:text-left">
+          <Link href="/" className="hover:text-white transition md:text-left">
             Event rules and regulations
           </Link>
-          <Link href="/privacy" className="hover:text-white transition md:text-left">
+          <Link href="/" className="hover:text-white transition md:text-left">
             Privacy Policy
           </Link>
           <p className="md:text-right">
-          Copyright © 2025 TEDXSVIET
+          Copyright © 2025 Flames Summit India
         </p>
         </div>
       </div>

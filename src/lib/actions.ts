@@ -1,19 +1,27 @@
 'use server';
 
 import { Resend } from 'resend';
-import { adminDb } from './firebaseAdmin'; // Firestore Admin SDK
+// ✅ CORRECT: Import the SECURE Admin DB
+import { adminDb } from './firebaseAdmin'; 
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ============================================================
 // ✅ EMAIL SUBSCRIBE ACTION
 // ============================================================
+
+/**
+ * Tries to extract a formatted name from an email address.
+ */
+
 export const subscribeEmail = async (email: string) => {
   if (!email) {
     return { success: false, error: 'Email is required.' };
   }
 
+
   try {
+    // ✅ CORRECT: Use adminDb
     const subscriberRef = adminDb.collection('subscribers').doc(email);
     const doc = await subscriberRef.get();
 
@@ -32,13 +40,18 @@ export const subscribeEmail = async (email: string) => {
       to: email,
       subject: 'Welcome to the Flames Summit Waitlist! 🔥',
       html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h1>Thank you for subscribing!</h1>
-          <p>You're officially on the waitlist for Flames Summit 2026.</p>
-          <p>Stay tuned for updates, early-bird tickets, and behind-the-scenes insights!</p>
-          <p>Get ready to BUILD For BHARAT!</p>
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+          <img 
+            src="https://www.flamessummit.org/email-banner.png" 
+            alt="Flames Summit Banner" 
+            style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;" 
+          />
+          <h1 style="color: #333;">Hey Folk,</h1>
+          <p style="color: #555;">Thank you for subscribing!</p>
+          <p style="color: #555;">You're officially on the waitlist for Flames Summit 2026.</p>
+          <p style="color: #555;">Stay tuned for updates, early-bird tickets, and behind-the-scenes insights!</p>
           <br/>
-          <p>Warm regards,<br/>Team Flames Summit India 2026</p>
+          <p style="color: #555;">Warm regards,<br/>Team Flames Summit India 2026</p>
           <hr style="border:none;border-top:1px solid #eaeaea;margin:20px 0;" />
           <div style="text-align:center;font-size:12px;color:#777;">
             <p>Follow us:</p>
@@ -52,7 +65,7 @@ export const subscribeEmail = async (email: string) => {
 
     return { success: true, message: 'Success! Check your email to confirm.' };
   } catch (error) {
-    console.error('Action Error:', error);
+    console.error('Subscribe Action Error:', error);
     return { success: false, error: 'Something went wrong. Please try again.' };
   }
 };
@@ -69,21 +82,18 @@ export interface VolunteerApplicationData {
   role: string;
   customRole: string;
   whyJoin: string;
-  approved: boolean;
+  approved: boolean; // Server will set this
   timestamp?: string;
-  [key: string]: any; // Allow other properties
-}
-
-export interface VolunteerDataWithId extends Omit<VolunteerApplicationData, 'id'> {
-  id: string;
+  [key: string]: any; 
 }
 
 // ✅ Check if email or phone already exists in Firestore
 export const checkVolunteerUniqueness = async (email: string, phone: string) => {
   try {
+    // ✅ CORRECT: Use adminDb
     const emailQuery = await adminDb
       .collection('volunteers')
-      .where('email', '==', email)
+      .where('email', '==', email.toLowerCase().trim())
       .limit(1)
       .get();
 
@@ -91,9 +101,10 @@ export const checkVolunteerUniqueness = async (email: string, phone: string) => 
       return { success: false, field: 'email', message: 'This email is already registered.' };
     }
 
+    // ✅ CORRECT: Use adminDb
     const phoneQuery = await adminDb
       .collection('volunteers')
-      .where('phone', '==', phone)
+      .where('phone', '==', phone) // You can add normalization here if needed
       .limit(1)
       .get();
 
@@ -104,7 +115,7 @@ export const checkVolunteerUniqueness = async (email: string, phone: string) => 
     return { success: true };
   } catch (error) {
     console.error('Error checking uniqueness:', error);
-    return { success: false, message: 'Failed to validate uniqueness.' };
+    return { success: false, message: 'Server validation failed. Please try again.' };
   }
 };
 
@@ -120,10 +131,12 @@ export const submitVolunteerForm = async (formData: VolunteerApplicationData) =>
   try {
     const submissionData = {
       ...formData,
-      approved: false,
+      email: formData.email.toLowerCase().trim(),
+      approved: false, // Server sets this
       timestamp: new Date().toISOString(),
     };
 
+    // ✅ CORRECT: Use adminDb
     await adminDb.collection('volunteers').add(submissionData);
 
     const firstName = fullname.split(' ')[0] || 'there';
@@ -134,6 +147,11 @@ export const submitVolunteerForm = async (formData: VolunteerApplicationData) =>
       subject: "We've Received Your Volunteer Application! 🔥",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+          <img 
+            src="https://www.flamessummit.org/email-banner.png" 
+            alt="Flames Summit Banner" 
+            style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;" 
+          />
           <h1 style="color: #333;">Hey ${firstName},</h1>
           <p>Thank you for applying to be a volunteer at Flames Summit India!</p>
           <p>We've successfully received your application for the <strong>${role}</strong> role.</p>
@@ -158,7 +176,9 @@ export const submitVolunteerForm = async (formData: VolunteerApplicationData) =>
   }
 };
 
-// ✅ Get all volunteers (default: latest 10)
+// ============================================================
+// ✅ ADMIN PANEL FUNCTIONS
+// ============================================================
 export type Volunteer = {
   id: string;
   fullname: string;
@@ -169,10 +189,12 @@ export type Volunteer = {
   customRole: string;
   whyJoin: string;
   approved: boolean;
-  [key: string]: any; // Allow other properties
+  timestamp?: string;
+  [key: string]: any; 
 };
 
-export const getVolunteers = async (limitCount: number = 10): Promise<Volunteer[]> => {
+// ✅ Get all volunteers
+export const getVolunteers = async (limitCount: number = 25): Promise<Volunteer[]> => {
   try {
     const snapshot = await adminDb
       .collection('volunteers')
@@ -184,16 +206,7 @@ export const getVolunteers = async (limitCount: number = 10): Promise<Volunteer[
 
     return snapshot.docs.map((doc) => ({
       id: doc.id,
-      fullname: doc.get('fullname') || '',
-      email: doc.get('email') || '',
-      phone: doc.get('phone') || '',
-      linkedin: doc.get('linkedin') || '',
-      role: doc.get('role') || '',
-      customRole: doc.get('customRole') || '',
-      whyJoin: doc.get('whyJoin') || '',
-      approved: doc.get('approved') || false,
-      timestamp: doc.get('timestamp') || new Date().toISOString(),
-      ...doc.data()
+      ...doc.data(),
     } as Volunteer));
   } catch (error) {
     console.error('Error fetching volunteers:', error);
@@ -212,8 +225,14 @@ export const updateVolunteer = async (id: string, updatedData: Partial<Volunteer
   }
 };
 
+// --- Approval Email HTML ---
 const buildApprovalEmailHTML = (firstName: string, role: string) => `
   <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+    <img 
+      src="https://www.flamessummit.org/email-banner.png" 
+      alt="Flames Summit Banner" 
+      style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;" 
+    />
     <h1 style="color: #333;">You're in, ${firstName}! 🔥</h1>
     <p>Congrats — your application for <strong>${role}</strong> has been <strong>approved</strong> for Flames Summit India.</p>
     <p>We're excited to have you on the team. We'll follow up soon with onboarding details, timelines, and next steps.</p>
@@ -230,11 +249,9 @@ const buildApprovalEmailHTML = (firstName: string, role: string) => `
   </div>
 `;
 
-
 // ✅ Approve volunteer
 export const approveVolunteer = async (id: string) => {
   try {
-    // 1) Read the volunteer to get email/name/role
     const docRef = adminDb.collection('volunteers').doc(id);
     const snap = await docRef.get();
 
@@ -242,47 +259,22 @@ export const approveVolunteer = async (id: string) => {
       return { success: false, error: 'Volunteer not found.' };
     }
 
-    const data = snap.data() as {
-      fullname?: string;
-      email?: string;
-      role?: string;
-      [k: string]: any;
-    };
-
-    const fullname = (data?.fullname || '').trim();
-    const firstName = fullname.split(' ')[0] || 'there';
+    const data = snap.data() as Volunteer;
+    const firstName = (data?.fullname || '').split(' ')[0] || 'there';
     const email = (data?.email || '').trim();
     const role = (data?.role || 'Volunteer').trim();
 
-    // 2) Approve in Firestore
     await docRef.update({
       approved: true,
-      timestamp: new Date().toISOString(),
     });
 
-    // 3) Send approval email (non-blocking for the approval result)
     if (email) {
-      try {
-        await resend.emails.send({
-          from: 'Flames Summit <hello@flamessummit.org>',
-          to: email,
-          subject: 'You’re Approved! Welcome to the Flames Summit Team 🔥',
-          html: buildApprovalEmailHTML(firstName, role),
-        });
-      } catch (mailErr) {
-        console.warn(`Approved ${id} but failed to send email to ${email}:`, mailErr);
-        // Still return success since the approval itself worked
-        return {
-          success: true,
-          warning: 'Approved, but email could not be sent.',
-        };
-      }
-    } else {
-      console.warn(`Approved ${id} but no email present on document.`);
-      return {
-        success: true,
-        warning: 'Approved, but no email on file.',
-      };
+      await resend.emails.send({
+        from: 'Flames Summit <hello@flamessummit.org>',
+        to: email,
+        subject: 'You’re Approved! Welcome to the Flames Summit Team 🔥',
+        html: buildApprovalEmailHTML(firstName, role),
+      });
     }
 
     return { success: true };
@@ -291,12 +283,12 @@ export const approveVolunteer = async (id: string) => {
     return { success: false, error: 'Failed to approve volunteer.' };
   }
 };
+
 // ✅ Unapprove volunteer
 export const unapproveVolunteer = async (id: string) => {
   try {
     await adminDb.collection('volunteers').doc(id).update({
       approved: false,
-      timestamp: new Date().toISOString(),
     });
     return { success: true };
   } catch (error) {

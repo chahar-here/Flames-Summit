@@ -1,15 +1,20 @@
-// lib/firebase-admin.ts
+// lib/firebaseAdmin.ts
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string
-);
-
+// Initialize Firebase Admin
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+  try {
+    // In Google Cloud Run, this automatically uses the default service account
+    // No need for FSA_KEY at all!
+    admin.initializeApp({
+      projectId: 'flamess-e6675', // Your Firebase project ID
+    });
+    console.log("✅ Firebase Admin SDK Initialized with Default Credentials");
+  } catch (error: any) {
+    console.error("❌ Failed to initialize Firebase Admin:", error);
+    throw error;
+  }
 }
 
 const adminDb = getFirestore();
