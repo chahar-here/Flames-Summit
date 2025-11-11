@@ -10,10 +10,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // ✅ EMAIL SUBSCRIBE ACTION
 // ============================================================
 
-/**
- * Tries to extract a formatted name from an email address.
- */
-
 export const subscribeEmail = async (email: string) => {
   if (!email) {
     return { success: false, error: 'Email is required.' };
@@ -305,5 +301,139 @@ export const deleteVolunteer = async (id: string) => {
   } catch (error) {
     console.error('Error deleting volunteer:', error);
     return { success: false, error: 'Failed to delete volunteer.' };
+  }
+};
+
+// ============================================================
+// ✅ CONTACT FORM ACTION
+// ============================================================
+export interface ContactFormData {
+  fullName: string;
+  email: string;
+  message: string;
+}
+
+export const submitContactForm = async (formData: ContactFormData) => {
+  const { fullName, email, message } = formData;
+
+  if (!fullName || !email || !message) {
+    return { success: false, error: 'Please fill out all fields.' };
+  }
+
+  try {
+    // 1. Save the message to Firestore using the secure adminDb
+    await adminDb.collection('contacts').add({
+      ...formData,
+      createdAt: new Date().toISOString(),
+    });
+
+    // 2. Send the confirmation email
+    await resend.emails.send({
+      from: 'Flames Summit <hello@flamessummit.org>',
+      to: email, // Send to the user who submitted
+      subject: "Thanks for reaching out! (Flames Summit) 🔥",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+          <img 
+            src="https://www.flamessummit.org/email-banner.png" 
+            alt="Flames Summit Banner" 
+            style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;" 
+          />
+          <h1 style="color: #333;">Hey ${fullName.split(' ')[0]},</h1>
+          <p>Thanks for getting in touch!</p>
+          <p>We've received your message and will get back to you as soon as possible.</p>
+          <br/>
+          <p>Warm regards,<br/>The Flames Summit Team</p>
+        </div>
+      `,
+    });
+    
+    // (Optional) Send a notification to yourself
+    await resend.emails.send({
+      from: 'Flames Summit <hello@flamessummit.org>',
+      to: 'info@flamessummit.org', // Your admin email
+      subject: `New Contact Form Message from ${fullName}`,
+      html: `
+        <p><strong>Name:</strong> ${fullName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong> ${message}</p>
+      `,
+    });
+
+    return { success: true, message: 'Message sent successfully!' };
+  } catch (error) {
+    console.error('Contact form error:', error);
+    return { success: false, error: 'Something went wrong. Please try again.' };
+  }
+};
+
+
+// ============================================================
+// ✅ COMMUNITY PARTNER FUNCTIONS
+// ============================================================
+export interface CommunityPartnerData {
+  orgName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  website: string;
+  reason: string;
+}
+
+export const submitCommunityPartnerForm = async (formData: CommunityPartnerData) => {
+  const { orgName, contactName, email, reason } = formData;
+
+  if (!orgName || !contactName || !email) {
+    return { success: false, error: 'Please fill out all required fields.' };
+  }
+
+  try {
+    // 1. Save to Firestore
+    await adminDb.collection('communityPartners').add({
+      ...formData,
+      timestamp: new Date().toISOString(),
+      status: 'pending', // For your admin panel
+    });
+
+    // 2. Send "Thank You" email to the partner
+    await resend.emails.send({
+      from: 'Flames Summit <hello@flamessummit.org>',
+      to: email,
+      subject: "Thanks for your interest in partnering! 🔥",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+          <img 
+            src="https://www.flamessummit.org/email-banner.png" 
+            alt="Flames Summit Banner" 
+            style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;" 
+          />
+          <h1 style="color: #333;">Hey ${contactName.split(' ')[0]},</h1>
+          <p>Thank you for your interest in becoming a Community Partner for Flames Summit 2026!</p>
+          <p>We've received your application. Our partnerships team will review it and get back to you shortly.</p>
+          <br/>
+          <p>Warm regards,<br/>The Flames Summit Team</p>
+        </div>
+      `,
+    });
+    
+    // 3. (Optional) Send a notification to your own team
+    await resend.emails.send({
+      from: 'Flames Summit <hello@flamessummit.org>',
+      to: 'info@flamessummit.org', // Your admin email
+      subject: `New Community Partner Application: ${orgName}`,
+      html: `
+        <p><strong>Organization:</strong> ${orgName}</p>
+        <p><strong>Contact:</strong> ${contactName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${formData.phone}</p>
+        <p><strong>Website:</strong> ${formData.website}</p>
+        <p><strong>Reason:</strong> ${reason}</p>
+      `,
+    });
+
+    return { success: true, message: 'Application submitted successfully!' };
+  } catch (error) {
+    console.error('Community Partner form error:', error);
+    return { success: false, error: 'Something went wrong. Please try again.' };
   }
 };

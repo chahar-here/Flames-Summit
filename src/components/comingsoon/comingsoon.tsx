@@ -1,8 +1,6 @@
 'use client'; // This directive is necessary for using hooks like useState
 
 import React, { useState } from 'react';
-import { db } from '../../lib/firebase'; // Assuming your firebase config is in 'lib/firebase.ts'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { SubscribeForm } from '../ui/SubscribeForm';
 
 // You can use a library like 'lucide-react' for icons, or use SVGs directly like this.
@@ -14,9 +12,6 @@ const MapPinIcon = () => (
 );
 
 export default function ComingSoonPage() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState('');
 
   return (
     <main className="relative text-white min-h-screen flex flex-col items-center justify-center p-8 overflow-hidden">
@@ -31,7 +26,7 @@ export default function ComingSoonPage() {
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#eb0028] to-[#b62129]">
             FLAMES
-          </span> SUMMIT 2026
+          </span> INDIA 2026
         </h1>
         
         <p className="mt-6 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
