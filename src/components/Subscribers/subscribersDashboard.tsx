@@ -1,8 +1,7 @@
 "use client";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 import React, { useState, useEffect } from "react";
 import { IconTrash, IconMail, IconCalendar, IconUsers } from "@tabler/icons-react";
+import { getSubscribers, deleteSubscriber } from "@/lib/actions";
 
 interface Subscriber {
   id: string;
@@ -24,25 +23,16 @@ export function SubscriberDashboard() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
 
-  // Fetch subscribers from Firebase
+  // Fetch subscribers using adminDb action
   const fetchSubscribers = async () => {
-    setLoading(true);
     try {
-      const q = query(collection(db, "subscribers"), orderBy("subscribedAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      const fetchedSubscribers: Subscriber[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        fetchedSubscribers.push({
-          id: doc.id,
-          ...doc.data()
-        } as Subscriber);
-      });
-      
-      setSubscribers(fetchedSubscribers);
-      calculateDailyStats(fetchedSubscribers);
+      setLoading(true);
+      const data = await getSubscribers(100); // Get first 100 subscribers
+      setSubscribers(data);
+      calculateDailyStats(data);
     } catch (error) {
       console.error("Error fetching subscribers:", error);
+      alert("Failed to fetch subscribers");
     } finally {
       setLoading(false);
     }
@@ -90,26 +80,30 @@ export function SubscriberDashboard() {
       const dateB = b.subscribedAt?.toDate ? b.subscribedAt.toDate() : new Date(b.subscribedAt);
       
       if (sortOrder === "newest") {
-        return dateB - dateA;
+        return dateB.getTime() - dateA.getTime();
       } else {
-        return dateA - dateB;
+        return dateA.getTime() - dateB.getTime();
       }
     });
 
     setFilteredSubscribers(filtered);
   }, [subscribers, searchTerm, sortOrder]);
 
-  // Delete subscriber
+  // Delete subscriber using adminDb action
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this subscriber?")) return;
     
     setDeleting(id);
     try {
-      await deleteDoc(doc(db, "subscribers", id));
-      setSubscribers(subscribers.filter(sub => sub.id !== id));
+      const result = await deleteSubscriber(id);
+      if (result.success) {
+        setSubscribers(prev => prev.filter(sub => sub.id !== id));
+      } else {
+        throw new Error(result.error || 'Failed to delete subscriber');
+      }
     } catch (error) {
       console.error("Error deleting subscriber:", error);
-      alert("Failed to delete subscriber");
+      alert(error instanceof Error ? error.message : "Failed to delete subscriber");
     } finally {
       setDeleting(null);
     }
@@ -296,15 +290,6 @@ export function SubscriberDashboard() {
                 ))}
               </tbody>
             </table>
-
-            {/* Load More Button (Optional) */}
-            {filteredSubscribers.length >= 20 && (
-              <div className="flex justify-center mt-6">
-                <button className="px-6 py-2 bg-zinc-900 text-white rounded hover:bg-zinc-800 transition">
-                  Load More
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>

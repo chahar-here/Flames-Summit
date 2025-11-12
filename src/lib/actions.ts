@@ -175,6 +175,54 @@ export const submitVolunteerForm = async (formData: VolunteerApplicationData) =>
 // ============================================================
 // ✅ ADMIN PANEL FUNCTIONS
 // ============================================================
+
+//get all subscribers
+export type Subscriber = {
+  id: string;
+  email: string;
+  subscribedAt: any;
+  timestamp?: string;
+  [key: string]: any;
+}
+
+export const getSubscribers = async (limitCount: number = 100): Promise<Subscriber[]> =>  {
+  try{
+    const snapshot = await adminDb
+      .collection('subscribers')
+      .orderBy('subscribedAt', 'desc')
+      .limit(limitCount)
+      .get();
+    if(snapshot.empty) return[];
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        email: data.email,
+        // Convert Firestore Timestamp to ISO string
+        subscribedAt: data.subscribedAt?.toDate?.()?.toISOString() || data.subscribedAt || new Date().toISOString(),
+      } as Subscriber;
+    });
+  } catch (error) {
+    console.error('Error fetching subscribers:', error);
+    return [];
+  }
+};
+
+// ✅ Delete subscriber
+export const deleteSubscriber = async (id: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    await adminDb.collection('subscribers').doc(id).delete();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting subscriber:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to delete subscriber' 
+    };
+  }
+};
+
 export type Volunteer = {
   id: string;
   fullname: string;
