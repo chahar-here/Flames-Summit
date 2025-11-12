@@ -9,15 +9,11 @@ import { toast } from "sonner";
 import { LoaderOne } from "@/components/ui/loader";
 import { useRouter } from "next/navigation";
 
-// --- MODIFIED IMPORTS ---
-// We import the server action and its data type
 import {
   checkVolunteerUniqueness,
   submitVolunteerForm,
   VolunteerApplicationData,
 } from "@/lib/actions";
-// We no longer need client-side 'db', 'addDoc', or 'collection'
-// ---
 
 export function VolunteersForm() {
   const [formData, setFormData] = useState({
@@ -25,23 +21,27 @@ export function VolunteersForm() {
     email: "",
     phone: "",
     linkedin: "",
-    role: "", // This is now just for tracking the form, not final data
+    role: "",
     customRole: "",
     whyJoin: "",
   });
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
-  const [loading, setLoading] = useState(false);// Validate email format
-const isValidEmail = (email: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const [loading, setLoading] = useState(false);
 
-// Validate Indian phone number (e.g., +91 or 10 digits)
-const isValidPhone = (phone: string) =>
-  /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone);
+  // ✅ Fixed email validation
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  // ✅ Fixed phone validation - now more flexible
+  const isValidPhone = (phone: string) => {
+    // Remove spaces and dashes for validation
+    const cleaned = phone.replace(/[\s\-]/g, '');
+    // Match Indian numbers: optional +91, then 10 digits starting with 6-9
+    return /^(\+91)?[6789]\d{9}$/.test(cleaned);
+  };
 
-  // This logic remains the same
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -52,7 +52,6 @@ const isValidPhone = (phone: string) =>
     }));
   };
 
-  // This logic remains the same
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedRole(value);
@@ -63,70 +62,81 @@ const isValidPhone = (phone: string) =>
     }));
   };
 
-  // This logic remains the same
   const handleCustomRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setFormData((prev) => ({
       ...prev,
       customRole: value,
-      role: value, // This seems to be your logic, it's fine
+      role: value,
     }));
   };
 
-  // --- MODIFIED SUBMIT HANDLER ---
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  if (isSubmitting) return;
-  setIsSubmitting(true);
-  setLoading(true);
+  // ✅ Fixed submit handler with proper error handling
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log("Already submitting, ignoring...");
+      return;
+    }
 
-  // ✅ Step 1: Basic format validation
-  if (!isValidEmail(formData.email)) {
-    toast.error("Please enter a valid email address.");
-    setIsSubmitting(false);
-    setLoading(false);
-    return;
-  }
+    setIsSubmitting(true);
+    setLoading(true);
 
-  if (!isValidPhone(formData.phone)) {
-    toast.error("Please enter a valid Indian phone number.");
-    setIsSubmitting(false);
-    setLoading(false);
-    return;
-  }
+    try {
+      // Step 1: Validate email format
+      if (!isValidEmail(formData.email)) {
+        toast.error("Please enter a valid email address.");
+        return;
+      }
 
-  // ✅ Step 2: Check uniqueness from Firestore
-  const uniqueness = await checkVolunteerUniqueness(formData.email, formData.phone);
+      // Step 2: Validate phone format
+      if (!isValidPhone(formData.phone)) {
+        toast.error("Please enter a valid Indian phone number (e.g., +91 9876543210 or 9876543210)");
+        return;
+      }
 
-  if (!uniqueness.success) {
-    toast.error(uniqueness.message);
-    setIsSubmitting(false);
-    setLoading(false);
-    return;
-  }
+      // Step 3: Validate role
+      const finalRole = selectedRole === "other" ? formData.customRole.trim() : selectedRole;
+      
+      if (!finalRole) {
+        toast.error("Please select or enter a role.");
+        return;
+      }
 
-  // ✅ Step 3: Continue existing logic
-  const finalRole = selectedRole === "other" ? formData.customRole : selectedRole;
+      // Step 4: Check uniqueness from Firestore
+      console.log("Checking uniqueness...");
+      const uniqueness = await checkVolunteerUniqueness(
+        formData.email.trim(),
+        formData.phone.trim()
+      );
 
-  const applicationData: VolunteerApplicationData = {
-    fullname: formData.fullname,
-    email: formData.email,
-    phone: formData.phone,
-    linkedin: formData.linkedin,
-    role: finalRole,
-    customRole: formData.customRole,
-    whyJoin: formData.whyJoin,
-    approved: false,
-  };
+      if (!uniqueness.success) {
+        toast.error(uniqueness.message || "This email or phone is already registered.");
+        return;
+      }
 
-  try {
-    const result = await submitVolunteerForm(applicationData);
+      // Step 5: Prepare application data
+      const applicationData: VolunteerApplicationData = {
+        fullname: formData.fullname.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        linkedin: formData.linkedin.trim(),
+        role: finalRole,
+        customRole: formData.customRole.trim(),
+        whyJoin: formData.whyJoin.trim(),
+        approved: false,
+      };
 
-    if (result.success) {
-      toast.success(result.message || "Application submitted successfully!");
-      router.push("/callforvolunteers/success");
+      // Step 6: Submit to server
+      console.log("Submitting form...");
+      const result = await submitVolunteerForm(applicationData);
 
-      setTimeout(() => {
+      if (result.success) {
+        toast.success(result.message || "Application submitted successfully!");
+        
+        // Reset form
         setFormData({
           fullname: "",
           email: "",
@@ -137,37 +147,35 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           whyJoin: "",
         });
         setSelectedRole("");
-        setLoading(false);
-      }, 300);
-    } else {
-      toast.error(result.error || "Failed to submit application.");
+        
+        // Navigate to success page
+        router.push("/callforvolunteers/success");
+      } else {
+        toast.error(result.error || "Failed to submit application. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
       setLoading(false);
     }
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    toast.error("An unexpected error occurred. Please try again.");
-    setLoading(false);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
-  // --- END OF MODIFIED HANDLER ---
+  };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen w-full">
-      <LoaderOne />
-    </div>
+    return (
+      <div className="flex items-center justify-center h-screen w-full">
+        <LoaderOne />
+      </div>
+    );
   }
 
-  // --- All JSX below this line is IDENTICAL to your original file ---
   return (
     <div className="shadow-input mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 bg-black/80">
       <h1 className="text-3xl text-white md:text-5xl font-bold tracking-tight text-center my-4">
         Call for{" "}
-        <span className=" bg-clip-text bg-gradient-to-r text-[#eb0028]">
-          Voluteers
+        <span className="bg-clip-text bg-gradient-to-r text-[#eb0028]">
+          Volunteers
         </span>
       </h1>
       <p className="mt-2 max-w-sm text-sm text-neutral-300 text-center">
@@ -183,7 +191,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       <form className="mt-8" onSubmit={handleSubmit}>
         <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
           <LabelInputContainer>
-            <Label htmlFor="fullname">Full name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="fullname">
+              Full name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="fullname"
               name="fullname"
@@ -195,8 +205,11 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             />
           </LabelInputContainer>
         </div>
+        
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="email">Email Address <span className="text-red-500">*</span></Label>
+          <Label htmlFor="email">
+            Email Address <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="email"
             name="email"
@@ -207,20 +220,26 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             required
           />
         </LabelInputContainer>
+        
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="Phone">Phone <span className="text-red-500">*</span></Label>
+          <Label htmlFor="phone">
+            Phone <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="phone"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="+91 xxxxxxxxxx"
+            placeholder="+91 9876543210"
             type="tel"
             required
           />
         </LabelInputContainer>
+        
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="linkedin">Linkedin <span className="text-red-500">*</span></Label>
+          <Label htmlFor="linkedin">
+            LinkedIn <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="linkedin"
             name="linkedin"
@@ -231,14 +250,17 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             required
           />
         </LabelInputContainer>
+        
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
+          <Label htmlFor="role">
+            Role <span className="text-red-500">*</span>
+          </Label>
           <Select
             id="role"
             name="role"
             value={selectedRole}
             onChange={handleRoleChange}
-            className="flex h-10 w-full rounded-md   px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-800 text-neutral-300 placeholder:text-neutral-600"
+            className="flex h-10 w-full rounded-md px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-800 text-neutral-300 placeholder:text-neutral-600"
             required
           >
             <option value="">Select your role</option>
@@ -251,6 +273,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             <option value="other">Other</option>
           </Select>
         </LabelInputContainer>
+        
         {selectedRole === "other" && (
           <LabelInputContainer className="mb-8">
             <Label htmlFor="customRole">Please specify your role</Label>
@@ -264,6 +287,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             />
           </LabelInputContainer>
         )}
+        
         <LabelInputContainer className="mb-8">
           <Label htmlFor="whyJoin">
             Why do you want to join? <span className="text-red-500">*</span>
@@ -274,35 +298,33 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             value={formData.whyJoin}
             onChange={handleChange}
             placeholder="Tell us why you want to join our team..."
-            className="flex h-32 w-full rounded-md  px-3 py-2 text-sm transition-colors  disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-800 text-neutral-300 placeholder:text-neutral-600"
+            className="flex h-32 w-full rounded-md px-3 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 bg-zinc-800 text-neutral-300 placeholder:text-neutral-600"
             required
           />
         </LabelInputContainer>
 
         <button
-          className={`group/btn relative block h-10 w-full rounded-md bg-gradient-to-br font-medium text-white bg-zinc-800 from-zinc-900 to-zinc-900 shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+          className={`group/btn relative block h-10 w-full rounded-md bg-gradient-to-br font-medium text-white bg-zinc-800 from-zinc-900 to-zinc-900 shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] ${
+            isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+          }`}
           disabled={isSubmitting}
           type="submit"
         >
           {isSubmitting ? "Submitting..." : "Submit →"}
           <BottomGradient />
         </button>
+        
         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent dark:via-[#E62B1E]/80" />
-
-        <div className="flex flex-col space-y-4"></div>
       </form>
     </div>
   );
 }
+
 const BottomGradient = () => {
   return (
     <>
-      {/* Sharp underline */}
       <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
-      {/* Blurred glowing underline */}
       <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
-
     </>
   );
 };

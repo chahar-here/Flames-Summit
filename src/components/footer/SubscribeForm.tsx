@@ -1,73 +1,3 @@
-// "use client";
-// import React, { useState } from "react";
-// import { db } from "../../lib/firebase"; // adjust path if needed
-// import { collection, addDoc, Timestamp } from "firebase/firestore";
-// import { IconSend } from "@tabler/icons-react";
-
-// export const SubscribeForm = () => {
-//   const [email, setEmail] = useState("");
-//   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-
-//     if (!email || !email.includes("@")) {
-//       setStatus("error");
-//       return;
-//     }
-
-//     try {
-//       await addDoc(collection(db, "subscribers"), {
-//         email,
-//         subscribedAt: Timestamp.now(),
-//       });
-
-//       setStatus("success");
-//       setEmail("");
-//     } catch (error) {
-//       console.error("Subscription error:", error);
-//       setStatus("error");
-//     }
-//   };
-
-
-//   return (
-//     <form onSubmit={handleSubmit} className=" flex flex-col">
-//       <label htmlFor="email" className="block text-md font-bold text-center md:text-left text-white mb-2">
-//         Get the latest on TEDxSVIET<br/>conferences year round
-//       </label>
-//       <div className="flex flex-row items-center bg-[#E5E5E5] rounded-md">
-//         <input
-//           id="email"
-//           type="email"
-//           required
-//           placeholder="your@email.com"
-//           className=" px-2 py-2 text-sm bg-[#E5E5E5] rounded-md text-black placeholder-gray-900 focus:outline-none focus:ring-2 focus:ring-[#E62B1E] z-50"
-//           value={email}
-//           onChange={(e) => {
-//             setEmail(e.target.value);
-//             setStatus("idle");
-//           }}
-//         />
-//         <hr className="border-[#E62B1E] h-full"/>
-//         <button
-//           type="submit"
-//           className=" inline-flex lg:text-sm px-2 py-2 bg-[#E5E5E5] hover:bg-[#d1d5db] text-black font-semibold rounded-md transition duration-300"
-//         >
-//           <IconSend size={18} />
-//           Subscribe
-//         </button>
-//       </div>
-
-//       {status === "success" && (
-//         <p className="text-green-400 text-sm mt-2">Thank you for subscribing!</p>
-//       )}
-//       {status === "error" && (
-//         <p className="text-red-400 text-sm mt-2">Please enter a valid email address.</p>
-//       )}
-//     </form>
-//   );
-// };
 "use client";
 import React, { useState } from "react";
 // 1. Import the server action (NOT client-side db)
@@ -116,11 +46,10 @@ export function SubscribeForm() {
     <form onSubmit={handleSubmit} className="flex w-full flex-col">
       <label
         htmlFor="email-footer"
-        className="block text-md font-bold text-center md:text-left text-white mb-2"
+        className="block text-md font-bold text-center md:text-right text-white mb-2"
       >
-        Get the latest on TEDxSVIET
+        Get the latest on Flames Summit India
         <br />
-        conferences year round
       </label>
       <div className="flex flex-row items-center rounded-md bg-[#E5E5E5]">
         <input
@@ -129,7 +58,7 @@ export function SubscribeForm() {
           required
           placeholder="your@email.com"
           // Added flex-1 to make the input fill the space
-          className="flex-1 rounded-l-md bg-[#E5E5E5] px-2 py-2 text-sm text-black placeholder-gray-900 focus:outline-none focus:ring-2 focus:ring-[#E62B1E] z-10"
+          className="flex-1 rounded-l-md bg-[#E5E5E5] px-2 w-10 py-2 text-sm text-black placeholder-gray-900 focus:outline-none focus:ring-2 focus:ring-[#E62B1E] z-10"
           value={email}
           disabled={isLoading} // 7. Add disabled state
           onChange={(e) => {

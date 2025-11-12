@@ -7,7 +7,6 @@ import { SubscribeForm } from "@/components/ui/SubscribeForm";
 import { DotsBackground } from "@/components/ui/InteractiveDotBackground";
 
 export default function RegisterationsPage() {
-  const [email, setEmail] = useState("");
 
   return (
     // This main container centers your content.
