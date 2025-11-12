@@ -100,14 +100,14 @@ export default function RootLayout({
     },
     {
       label: "Contact Us",
-      href: "/admin/dashboard/contacts",
+      href: "/Ad_min/signin/contactus",
       icon: (
         <IconMessage className="h-5 w-5 shrink-0 text-neutral-200" />
       ),
     },
     {
       label: "Subscribers",
-      href: "/admin/dashboard/subscribers",
+      href: "/Ad_min/signin/subscribers",
       icon: (
         <IconMailBolt className="h-5 w-5 shrink-0 text-neutral-200" />
       ),
