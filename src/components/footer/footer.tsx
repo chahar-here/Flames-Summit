@@ -38,8 +38,8 @@ export function Footer() {
           {/* Navigation Links */}
           <div className="text-center md:text-left font-semibold text-md flex md:flex-col gap-4 justify-center">
             {/* <h3 className="text-lg font-semibold text-white">Quick Links</h3> */}
-                <Link href="/" className="hover:text-white transition">
-                 Partner with us
+                <Link href="/communitypartner" className="hover:text-white transition">
+                 Become Community Partner
                 </Link>
                 <Link href="/callforvolunteers" className="hover:text-white transition">
                   Become a Volunteer

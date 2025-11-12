@@ -1,4 +1,4 @@
-// app/partner-with-us/page.tsx
+// communitypartner.tsx/
 "use client";
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { LoaderOne } from "@/components/ui/loader"; // Assuming you have this
 import { useRouter } from "next/navigation";
-import { IconLoader2 } from "@tabler/icons-react";
+import { IconBrandInstagram, IconBrandLinkedin, IconBrandX, IconLoader2 } from "@tabler/icons-react";
 
 // Import the new server action
 import { submitCommunityPartnerForm, CommunityPartnerData } from "@/lib/actions";
 
-export default function PartnerWithUsPage() {
+export default function CommunityPartner() {
   const [formData, setFormData] = useState<CommunityPartnerData>({
     orgName: "",
     contactName: "",
@@ -166,6 +166,18 @@ export default function PartnerWithUsPage() {
 
           <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-[#E62B1E] to-transparent dark:via-[#E62B1E]/80" />
         </form>
+
+        <div className="flex items-center justify-center mt-6 space-x-10">
+          <a href="https://x.com/flamessummit" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition">
+            <IconBrandX size={30} />
+          </a>
+          <a href="https://www.linkedin.com/company/flamessummitindia" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition">
+            <IconBrandLinkedin size={30} />
+          </a>
+          <a href="https://www.instagram.com/flamessummitindia" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition">
+            <IconBrandInstagram size={32} />
+          </a>
+        </div>
       </div>
     </div>
   );
