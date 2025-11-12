@@ -175,6 +175,120 @@ export const submitVolunteerForm = async (formData: VolunteerApplicationData) =>
 // ============================================================
 // ✅ ADMIN PANEL FUNCTIONS
 // ============================================================
+export type ContactMessage = {
+  id: string;
+  fullName: string;
+  email: string;
+  message: string;
+  resolved: boolean;
+  createdAt: string; // ISO string
+  [key: string]: any;
+};
+
+export const getContactMessages = async (limitCount: number = 100): Promise<ContactMessage[]> => {
+  try {
+    const snapshot = await adminDb
+      .collection('contacts')
+      .orderBy('createdAt', 'desc')
+      .limit(limitCount)
+      .get();
+
+    if (snapshot.empty) return [];
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        fullName: data.fullName || '',
+        email: data.email || '',
+        message: data.message || '',
+        resolved: data.resolved || false,
+        // Convert Firestore Timestamp to ISO string
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt || new Date().toISOString(),
+      } as ContactMessage;
+    });
+  } catch (error) {
+    console.error('Error fetching contact messages:', error);
+    return [];
+  }
+};
+
+export const deleteContactMessage = async (id: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    await adminDb.collection('contacts').doc(id).delete();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting contact message:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to delete contact message' 
+    };
+  }
+};
+
+// ✅ Toggle resolved status
+export const toggleContactResolved = async (id: string, currentState: boolean): Promise<{ success: boolean; error?: string }> => {
+  try {
+    await adminDb.collection('contacts').doc(id).update({ 
+      resolved: !currentState 
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating contact message:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to update contact message' 
+    };
+  }
+};
+
+//get all subscribers
+export type Subscriber = {
+  id: string;
+  email: string;
+  subscribedAt: any;
+  timestamp?: string;
+  [key: string]: any;
+}
+
+export const getSubscribers = async (limitCount: number = 100): Promise<Subscriber[]> =>  {
+  try{
+    const snapshot = await adminDb
+      .collection('subscribers')
+      .orderBy('subscribedAt', 'desc')
+      .limit(limitCount)
+      .get();
+    if(snapshot.empty) return[];
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        email: data.email,
+        // Convert Firestore Timestamp to ISO string
+        subscribedAt: data.subscribedAt?.toDate?.()?.toISOString() || data.subscribedAt || new Date().toISOString(),
+      } as Subscriber;
+    });
+  } catch (error) {
+    console.error('Error fetching subscribers:', error);
+    return [];
+  }
+};
+
+// ✅ Delete subscriber
+export const deleteSubscriber = async (id: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    await adminDb.collection('subscribers').doc(id).delete();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting subscriber:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to delete subscriber' 
+    };
+  }
+};
+
 export type Volunteer = {
   id: string;
   fullname: string;

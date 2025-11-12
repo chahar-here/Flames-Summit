@@ -1,9 +1,6 @@
 import React from 'react'
+import { ContactDashboard } from '@/components/Contactus/contactDashboard'
 
-const Contactus = () => {
-  return (
-    <div>Contact us</div>
-  )
+export default function AdminContactsPage() {
+  return <ContactDashboard />;
 }
-
-export default Contactus

@@ -162,6 +162,6 @@ const LabelInputContainer = ({
   return (
     <div className={cn("flex w-full flex-col space-y-2", className)}>
       {children}
-    </div>
-  );
+    </div>
+  );
 };
