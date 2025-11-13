@@ -11,7 +11,6 @@ import {
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { ThemeToggle } from "../theme-toggle";
 
 // --- Types (All types remain the same) ---
 export interface NavItem {

@@ -49,3 +49,14 @@ export function InteractiveDotBackground() {
     />
   );
 }
+
+export function DotsBackground() {
+  return(
+    <div className={cn(
+    "fixed inset-0 bg-black",
+        "[background-size:20px_20px]",
+        "[background-image:radial-gradient(#404040_1px,transparent_1px)]",
+        "-z-40")} >
+        </div>
+  );
+}
