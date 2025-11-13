@@ -43,11 +43,12 @@ function initializeFirebaseAdmin(): Firestore {
       } else {
         console.log('🔥 Initializing for local environment');
         
-        if (!process.env.FSA_KEY) {
+        const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (!keyString) {
           throw new Error('FSA_KEY not found in environment');
         }
         
-        const serviceAccount = JSON.parse(process.env.FSA_KEY);
+        const serviceAccount = JSON.parse(keyString);
         app = admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
           projectId: serviceAccount.project_id,
