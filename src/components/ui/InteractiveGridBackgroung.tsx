@@ -22,7 +22,7 @@
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect } from "react"; // Import React hooks
 
-export function GridSmallBackgroundDemo() {
+export function InteractiveGridBackgroung() {
   // --- Start of Mouse Tracking Logic ---
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 

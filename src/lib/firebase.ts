@@ -1,9 +1,10 @@
 // lib/firebase.ts
-// THIS IS FOR CLIENT-SIDE USE ONLY (e.g., login page)
+// CLIENT-SIDE Firebase Initialization
 
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth"; 
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage"; // ✅ ADD THIS
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,8 +15,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Prevent multiple inits
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
-const auth = getAuth(app);
 
-export { db, auth };
+// Firebase services
+export const db = getFirestore(app);
+export const auth = getAuth(app);
+export const storage = getStorage(app);  // ✅ STORAGE INITIALIZED
